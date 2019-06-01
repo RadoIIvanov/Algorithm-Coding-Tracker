@@ -17,7 +17,7 @@ interface TempObjToStoreUserInputsAtTheEndOfACodingSession {
   name: string;
   platform: string;
   classifiedDifficulty: string;
-  percentAcceptedSubmissions: number;
+  percentAcceptedSubmissions: number | string;
 }
 
 interface ProlongedTime {
@@ -315,10 +315,17 @@ export class Timer {
                       if (percentAcceptedSubmissionsText === undefined) {
                         return;
                       } else {
-                        let percentAcceptedSubmissionsNumber = Number(
-                          percentAcceptedSubmissionsText
-                        );
-                        tempObj.percentAcceptedSubmissions = percentAcceptedSubmissionsNumber;
+                        if (
+                          percentAcceptedSubmissionsText.toLocaleLowerCase() ===
+                          "unknown"
+                        ) {
+                          tempObj.percentAcceptedSubmissions = percentAcceptedSubmissionsText.toLocaleLowerCase();
+                        } else {
+                          let percentAcceptedSubmissionsNumber = Number(
+                            percentAcceptedSubmissionsText
+                          );
+                          tempObj.percentAcceptedSubmissions = percentAcceptedSubmissionsNumber;
+                        }
 
                         for (let key in tempObj) {
                           this._objectOfData[key] = tempObj[key];

@@ -20,9 +20,13 @@ export function validateNameInputInShowBox(str: string | undefined) {
 export function validatePercentAcceptedSubmissionsInputInShowBox(
   percent: string | undefined
 ) {
+  if (percent.toLowerCase() === "unknown") {
+    return undefined;
+  }
+
   let regexToCheckForAnyWordCharacters = /[^0-9.\s]/;
   if (!percent || regexToCheckForAnyWordCharacters.test(percent)) {
-    return "Please don't include any word characters";
+    return "Please don't include any word characters, unless the percent is unknown";
   }
   let regexForMoreThanOneDecimalPoint = /[.]/g;
   let matchingResults = percent.match(regexForMoreThanOneDecimalPoint);
