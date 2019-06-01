@@ -1,7 +1,7 @@
 {
   "name": "algocodingtracker",
   "displayName": "algoCodingTracker",
-  "description": "",
+  "description": "Track your coding patterns during algo challenges",
   "version": "0.0.1",
   "publisher": "RadoIvanov",
   "engines": {
@@ -10,6 +10,13 @@
   "categories": [
     "Other"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RadoIIvanov/Algorithm-Coding-Tracker"
+  },
+  "bugs": {
+    "url": "https://github.com/RadoIIvanov/Algorithm-Coding-Tracker/issues"
+  },
   "activationEvents": [
     "onCommand:extension.algocodingtracker.initiateTimer"
   ],
