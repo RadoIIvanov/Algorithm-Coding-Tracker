@@ -69,6 +69,9 @@ export class Timer {
   /// Event emitter for prolonged stage (i.e. will apply to the 4th and 5th stages, which are more likely)
   private _eventEmitterForProlongedStages: vscode.EventEmitter<ProlongedTime>;
 
+  /// Local variable to store context - useful if you want to keep only one active instance of timer across all vscode instances
+  private _context: vscode.ExtensionContext;
+
   constructor(context: vscode.ExtensionContext) {
     if (!this._statusBarItemTimer) {
       this._statusBarItemButtonStop = vscode.window.createStatusBarItem(
@@ -125,21 +128,26 @@ export class Timer {
       this._currentPlatforms = platforms;
       this._problemDifficulty = problemDifficulty;
 
-      /// initiate watcher
-      this._fsWatcherToSignalChangesToDataFileAndDisposeResources = initiateWatcher(
-        context.globalState.get("fixedPath"),
-        this,
-        context
-      );
-      /// initialize local variable to store fixed path
-      this._localVariableToStoreFixedPathToDatabaseFile = context.globalState.get(
-        "fixedPath"
-      );
-
       /// initialize the event emitter for prolonged stages
       this._eventEmitterForProlongedStages = new vscode.EventEmitter<
         ProlongedTime
       >();
+
+      if (context !== undefined) {
+        /// initiate watcher
+        this._fsWatcherToSignalChangesToDataFileAndDisposeResources = initiateWatcher(
+          context.globalState.get("fixedPath"),
+          this,
+          context
+        );
+        /// initialize local variable to store fixed path
+        this._localVariableToStoreFixedPathToDatabaseFile = context.globalState.get(
+          "fixedPath"
+        );
+
+        /// initialize context
+        this._context = context;
+      }
     }
   }
 
@@ -149,6 +157,10 @@ export class Timer {
 
   get onProlongedTime(): vscode.Event<ProlongedTime> {
     return this._eventEmitterForProlongedStages.event;
+  }
+
+  get context(): vscode.ExtensionContext {
+    return this._context;
   }
 
   public start(context: vscode.ExtensionContext) {
