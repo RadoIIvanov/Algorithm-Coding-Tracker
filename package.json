@@ -2,7 +2,7 @@
   "name": "algocodingtracker",
   "displayName": "algoCodingTracker",
   "description": "Track your coding patterns during algo challenges",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "publisher": "RadoIvanov",
   "engines": {
     "vscode": "^1.33.0"

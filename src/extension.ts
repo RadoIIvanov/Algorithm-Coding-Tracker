@@ -18,6 +18,15 @@ export function activate(context: vscode.ExtensionContext) {
   // Now provide the implementation of the command with registerCommand
   // The commandId parameter must match the command field in package.json
 
+  if (!context.globalState.get("timerIsOn")) {
+    context.globalState.update("timerIsOn", true);
+  } else {
+    vscode.window.showInformationMessage(
+      "Timer is running already in another vscode instance, please continue there"
+    );
+    return;
+  }
+
   if (context.globalState.get("fixedPath") === undefined) {
     context.globalState.update("fixedPath", fullPath);
   }
@@ -42,6 +51,7 @@ export function activate(context: vscode.ExtensionContext) {
           });
       } else {
         timer = reInitializeTimer(timer, context);
+        context.globalState.update("timerIsOn", true);
       }
     }
   );
@@ -51,6 +61,7 @@ export function activate(context: vscode.ExtensionContext) {
     () => {
       if (timer.state !== TimerState.Stopped) {
         timer.stop(context);
+        context.globalState.update("timerIsOn", false);
       } else {
         vscode.window.showInformationMessage("Timer is already stopped");
       }
