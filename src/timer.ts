@@ -282,7 +282,7 @@ export class Timer {
         }
       }
     );
-  };
+  }
 
   public testCallback = () => {};
 
