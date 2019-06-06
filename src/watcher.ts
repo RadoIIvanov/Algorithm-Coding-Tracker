@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { TimerState } from "./timer";
 import * as fs from "fs";
 import * as pathModule from "path";
 
@@ -20,15 +21,15 @@ export function createWatcher(fsWaitVariable, path, protagonist, context) {
           ...["Yes", "No"]
         )
         .then(choice => {
-          vscode.commands
-            .executeCommand("extension.algocodingtracker.stopTimer")
-            .then(value => {
-              if (choice === "Yes") {
-                vscode.commands.executeCommand(
-                  "extension.algocodingtracker.initiateTimer"
-                );
-              }
-            });
+          if (protagonist.state !== TimerState.Stopped) {
+            protagonist.stop(context);
+
+            if (choice === "Yes") {
+              vscode.commands.executeCommand(
+                "extension.algocodingtracker.initiateTimer"
+              );
+            }
+          }
         });
     }
   });

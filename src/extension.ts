@@ -43,18 +43,7 @@ export function activate(context: vscode.ExtensionContext) {
             }
           });
       } else {
-        if (
-          !context.globalState.get("timerIsOn") ||
-          context.globalState.get("timerIsOn") === "false"
-        ) {
-          context.globalState.update("timerIsOn", "true");
-          timer = reInitializeTimer(timer, context);
-        } else {
-          vscode.window.showInformationMessage(
-            "Timer is running already in another vscode instance, please continue there"
-          );
-          return;
-        }
+        timer = reInitializeTimer(timer, context);
       }
     }
   );
@@ -63,8 +52,7 @@ export function activate(context: vscode.ExtensionContext) {
     "extension.algocodingtracker.stopTimer",
     () => {
       if (timer.state !== TimerState.Stopped) {
-        timer.stop(context);
-        context.globalState.update("timerIsOn", "false");
+        timer.saveIfSessionAbortedAndStop(context);
       } else {
         vscode.window.showInformationMessage("Timer is already stopped");
       }
@@ -77,7 +65,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 // this method is called when your extension is deactivated
 export function deactivate() {
-  timer.context.globalState.update("timerIsOn", "false");
-
   /// this is execute just before vs code shuts down, in the case that it does
+  timer.saveIfSessionAbortedAndStop(timer.context);
 }

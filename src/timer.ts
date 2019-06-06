@@ -7,6 +7,8 @@ import {
   validatePercentAcceptedSubmissionsInputInShowBox
 } from "./validationOfInputs";
 
+//// define interface for object of data and use it instead of any (current one)
+
 interface TimeInfoObjectInterface {
   hours: string;
   minutes: string;
@@ -14,7 +16,6 @@ interface TimeInfoObjectInterface {
 }
 
 interface TempObjToStoreUserInputsAtTheEndOfACodingSession {
-  name: string;
   platform: string;
   classifiedDifficulty: string;
   percentAcceptedSubmissions: number | string;
@@ -164,18 +165,126 @@ export class Timer {
   }
 
   public start(context: vscode.ExtensionContext) {
-    this._startingTime = new Date().getTime();
-    this._state = TimerState.Running;
-    this._statusBarItemButtonStop.show();
-    this._statusBarItemTimer.show();
-    this._statusBarItemDescription.show();
-    this._statusBarItemButtonMoveOn.show();
-    this._statusBarItemButtonReturnTo.show();
+    //// check if there are previous incompletes (aborted sessions) and whether the user wants to try again or not
+    //// mark as incomplete when the timer is stopped midway as well
 
-    this._timer = this.initiateIntervalForTimer();
+    fs.readFile(
+      this._localVariableToStoreFixedPathToDatabaseFile,
+      (err, data) => {
+        if (err) {
+          console.log(err);
+        } else {
+          let convertBufferToString = data.toString();
+          let convertJSONtoJS = JSON.parse(convertBufferToString);
+          let incompleteChallenges = convertJSONtoJS.data.filter(
+            ({ status }) => {
+              return status === "Incomplete";
+            }
+          );
+          if (incompleteChallenges.length) {
+            vscode.window
+              .showInformationMessage(
+                "There are unsolved problems. Do you want to try any of them again?",
+                { modal: true },
+                ...["Yes", "No"]
+              )
+              .then(answer => {
+                if (answer === undefined) {
+                  return;
+                } else {
+                  if (answer === "Yes") {
+                    let namesOfIncompleteChallenges = incompleteChallenges.map(
+                      ({ name }) => name
+                    );
+                    vscode.window
+                      .showQuickPick(namesOfIncompleteChallenges)
+                      .then(name => {
+                        if (name === undefined) {
+                          return;
+                        } else {
+                          let dataOfChosenIncomplete = incompleteChallenges.filter(
+                            ({ name: nameOfIncomplete }) =>
+                              nameOfIncomplete === name
+                          );
 
-    this.registerCommandsDuringTheStart(context);
-  }
+                          for (let property in dataOfChosenIncomplete[0]) {
+                            this._objectOfData[property] =
+                              dataOfChosenIncomplete[property];
+                          }
+                          this._objectOfData["numberOfTries"]++;
+                          this._startingTime = new Date().getTime();
+                          this._state = TimerState.Running;
+                          this._statusBarItemButtonStop.show();
+                          this._statusBarItemTimer.show();
+                          this._statusBarItemDescription.show();
+                          this._statusBarItemButtonMoveOn.show();
+                          this._statusBarItemButtonReturnTo.show();
+
+                          this._timer = this.initiateIntervalForTimer();
+
+                          this.registerCommandsDuringTheStart(context);
+                        }
+                      });
+                  } else {
+                    let inputBoxOptions = {
+                      placeHolder: "Type the Name of the New Problem",
+                      validateInput: validateNameInputInShowBox
+                    };
+
+                    vscode.window.showInputBox(inputBoxOptions).then(name => {
+                      if (name === undefined) {
+                        return;
+                      } else {
+                        this._objectOfData["name"] = name.trim();
+                        this._objectOfData["numberOfTries"] = 1;
+                      }
+                      this._startingTime = new Date().getTime();
+                      this._state = TimerState.Running;
+                      this._statusBarItemButtonStop.show();
+                      this._statusBarItemTimer.show();
+                      this._statusBarItemDescription.show();
+                      this._statusBarItemButtonMoveOn.show();
+                      this._statusBarItemButtonReturnTo.show();
+
+                      this._timer = this.initiateIntervalForTimer();
+
+                      this.registerCommandsDuringTheStart(context);
+                    });
+                  }
+                }
+              });
+          } else {
+            let inputBoxOptions = {
+              placeHolder: "Type the Name of the New Problem",
+              validateInput: validateNameInputInShowBox
+            };
+
+            vscode.window.showInputBox(inputBoxOptions).then(name => {
+              if (name === undefined) {
+                return;
+              } else {
+                this._objectOfData["name"] = name.trim();
+                this._objectOfData["numberOfTries"] = 1;
+              }
+              this._startingTime = new Date().getTime();
+              this._state = TimerState.Running;
+              this._statusBarItemButtonStop.show();
+              this._statusBarItemTimer.show();
+              this._statusBarItemDescription.show();
+              this._statusBarItemButtonMoveOn.show();
+              this._statusBarItemButtonReturnTo.show();
+
+              this._timer = this.initiateIntervalForTimer();
+
+              this.registerCommandsDuringTheStart(context);
+            });
+          }
+        }
+      }
+    );
+  };
+
+  public testCallback = () => {};
 
   public registerCommandsDuringTheStart(context: vscode.ExtensionContext) {
     let timerPauseRestart = vscode.commands.registerCommand(
@@ -287,97 +396,117 @@ export class Timer {
   };
 
   public addAdditionalUserProvidedInfoBeforeSavingTheDetailsOfTheProblem() {
-    let inputBoxOptions = {
-      placeHolder: "Type the Name of the Problem",
-      validateInput: validateNameInputInShowBox
+    let tempObj: TempObjToStoreUserInputsAtTheEndOfACodingSession = {
+      platform: "",
+      classifiedDifficulty: "",
+      percentAcceptedSubmissions: 0
     };
-
-    vscode.window.showInputBox(inputBoxOptions).then(name => {
-      if (name === undefined) {
+    vscode.window.showQuickPick(this._currentPlatforms).then(platform => {
+      if (platform === undefined) {
         return;
       } else {
-        let tempObj: TempObjToStoreUserInputsAtTheEndOfACodingSession = {
-          name: "",
-          platform: "",
-          classifiedDifficulty: "",
-          percentAcceptedSubmissions: 0
-        };
-        tempObj.name = name.trim();
-        vscode.window.showQuickPick(this._currentPlatforms).then(platform => {
-          if (platform === undefined) {
-            return;
-          } else {
-            tempObj.platform = platform;
-            vscode.window
-              .showQuickPick(this._problemDifficulty)
-              .then(difficulty => {
-                if (difficulty === undefined) {
-                  return;
-                } else {
-                  tempObj.classifiedDifficulty = difficulty;
-                  let inputBoxOptions = {
-                    placeHolder: "Number from 0 to 100, or unknown",
-                    prompt:
-                      "The Overall Percent Of Accepted Submissions for the Problem",
-                    validateInput: validatePercentAcceptedSubmissionsInputInShowBox
-                  };
-                  vscode.window
-                    .showInputBox(inputBoxOptions)
-                    .then(percentAcceptedSubmissionsText => {
-                      if (percentAcceptedSubmissionsText === undefined) {
-                        return;
-                      } else {
-                        if (
-                          percentAcceptedSubmissionsText.toLocaleLowerCase() ===
-                          "unknown"
-                        ) {
-                          tempObj.percentAcceptedSubmissions = percentAcceptedSubmissionsText.toLocaleLowerCase();
+        tempObj.platform = platform;
+        vscode.window
+          .showQuickPick(this._problemDifficulty)
+          .then(difficulty => {
+            if (difficulty === undefined) {
+              return;
+            } else {
+              tempObj.classifiedDifficulty = difficulty;
+              let inputBoxOptions = {
+                placeHolder: "Number from 0 to 100, or unknown",
+                prompt:
+                  "The Overall Percent Of Accepted Submissions for the Problem",
+                validateInput: validatePercentAcceptedSubmissionsInputInShowBox
+              };
+              vscode.window
+                .showInputBox(inputBoxOptions)
+                .then(percentAcceptedSubmissionsText => {
+                  if (percentAcceptedSubmissionsText === undefined) {
+                    return;
+                  } else {
+                    if (
+                      percentAcceptedSubmissionsText.toLocaleLowerCase() ===
+                      "unknown"
+                    ) {
+                      tempObj.percentAcceptedSubmissions = percentAcceptedSubmissionsText.toLocaleLowerCase();
+                    } else {
+                      let percentAcceptedSubmissionsNumber = Number(
+                        percentAcceptedSubmissionsText
+                      );
+                      tempObj.percentAcceptedSubmissions = percentAcceptedSubmissionsNumber;
+                    }
+
+                    for (let key in tempObj) {
+                      this._objectOfData[key] = tempObj[key];
+                    }
+                    this._objectOfData["dateOfCompletion"] = new Date();
+                    this._objectOfData["status"] = "Complete";
+                    ///// start saving process
+
+                    fs.readFile(
+                      this._localVariableToStoreFixedPathToDatabaseFile,
+                      (err, data) => {
+                        if (err) {
+                          console.log(err);
                         } else {
-                          let percentAcceptedSubmissionsNumber = Number(
-                            percentAcceptedSubmissionsText
-                          );
-                          tempObj.percentAcceptedSubmissions = percentAcceptedSubmissionsNumber;
-                        }
-
-                        for (let key in tempObj) {
-                          this._objectOfData[key] = tempObj[key];
-                        }
-                        this._objectOfData["date"] = new Date();
-                        ///// start saving process
-
-                        fs.readFile(
-                          this._localVariableToStoreFixedPathToDatabaseFile,
-                          (err, data) => {
-                            if (err) {
-                              console.log(err);
-                            } else {
-                              let convertBufferToString = data.toString();
-                              let jsObject = JSON.parse(convertBufferToString);
-                              jsObject.data.push(this._objectOfData);
-                              let returnDataToJSON = JSON.stringify(jsObject);
-                              fs.writeFile(
-                                this
-                                  ._localVariableToStoreFixedPathToDatabaseFile,
-                                returnDataToJSON,
-                                err => {
-                                  if (err) {
-                                    console.log(err);
-                                  } else {
-                                    return;
-                                  }
-                                }
-                              );
+                          let convertBufferToString = data.toString();
+                          let jsObject = JSON.parse(convertBufferToString);
+                          jsObject.data.push(this._objectOfData);
+                          let returnDataToJSON = JSON.stringify(jsObject);
+                          fs.writeFile(
+                            this._localVariableToStoreFixedPathToDatabaseFile,
+                            returnDataToJSON,
+                            err => {
+                              if (err) {
+                                console.log(err);
+                              } else {
+                                return;
+                              }
                             }
-                          }
-                        );
+                          );
+                        }
                       }
-                    });
-                }
-              });
-          }
-        });
+                    );
+                  }
+                });
+            }
+          });
       }
     });
+  }
+
+  public saveIfSessionAbortedAndStop(context: vscode.ExtensionContext) {
+    fs.readFile(
+      this._localVariableToStoreFixedPathToDatabaseFile,
+      (err, data) => {
+        if (err) {
+          console.log(err);
+        } else {
+          let convertBufferToString = data.toString();
+          let jsObject = JSON.parse(convertBufferToString);
+
+          if (this._objectOfData["numberOfTries"] === 1) {
+            this._objectOfData["dateOfInitialTry"] = new Date();
+            this._objectOfData["status"] = "Incomplete";
+          }
+
+          jsObject.data.push(this._objectOfData);
+          let returnDataToJSON = JSON.stringify(jsObject);
+          fs.writeFile(
+            this._localVariableToStoreFixedPathToDatabaseFile,
+            returnDataToJSON,
+            err => {
+              if (err) {
+                console.log(err);
+              } else {
+                return;
+              }
+            }
+          );
+        }
+      }
+    );
   }
 
   public pressReturnToButton = () => {
