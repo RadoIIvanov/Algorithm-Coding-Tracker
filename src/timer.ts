@@ -71,7 +71,10 @@ export class Timer {
   private _eventEmitterForProlongedStages: vscode.EventEmitter<ProlongedTime>;
 
   /// Local variable to store context - useful if you want to keep only one active instance of timer across all vscode instances
-  private _context: vscode.ExtensionContext;
+  private _context: vscode.ExtensionContext; //// this needs to be evaluated
+
+  /// boolean variable to signal whether we are returning to a problem we have tried previously
+  private _revisitingAProblem: boolean;
 
   constructor(context: vscode.ExtensionContext) {
     if (!this._statusBarItemTimer) {
@@ -128,6 +131,7 @@ export class Timer {
 
       this._currentPlatforms = platforms;
       this._problemDifficulty = problemDifficulty;
+      this._revisitingAProblem = false;
 
       /// initialize the event emitter for prolonged stages
       this._eventEmitterForProlongedStages = new vscode.EventEmitter<
@@ -181,6 +185,7 @@ export class Timer {
               return status === "Incomplete";
             }
           );
+          let that = this;
           if (incompleteChallenges.length) {
             vscode.window
               .showInformationMessage(
@@ -208,21 +213,22 @@ export class Timer {
                           );
 
                           for (let property in dataOfChosenIncomplete[0]) {
-                            this._objectOfData[property] =
-                              dataOfChosenIncomplete[property];
+                            that._objectOfData[property] =
+                              dataOfChosenIncomplete[0][property];
                           }
-                          this._objectOfData["numberOfTries"]++;
-                          this._startingTime = new Date().getTime();
-                          this._state = TimerState.Running;
-                          this._statusBarItemButtonStop.show();
-                          this._statusBarItemTimer.show();
-                          this._statusBarItemDescription.show();
-                          this._statusBarItemButtonMoveOn.show();
-                          this._statusBarItemButtonReturnTo.show();
+                          that._revisitingAProblem = true;
+                          that._objectOfData["numberOfTries"]++;
+                          that._startingTime = new Date().getTime();
+                          that._state = TimerState.Running;
+                          that._statusBarItemButtonStop.show();
+                          that._statusBarItemTimer.show();
+                          that._statusBarItemDescription.show();
+                          that._statusBarItemButtonMoveOn.show();
+                          that._statusBarItemButtonReturnTo.show();
 
-                          this._timer = this.initiateIntervalForTimer();
+                          that._timer = that.initiateIntervalForTimer();
 
-                          this.registerCommandsDuringTheStart(context);
+                          that.registerCommandsDuringTheStart(context);
                         }
                       });
                   } else {
@@ -235,20 +241,20 @@ export class Timer {
                       if (name === undefined) {
                         return;
                       } else {
-                        this._objectOfData["name"] = name.trim();
-                        this._objectOfData["numberOfTries"] = 1;
+                        that._objectOfData["name"] = name.trim();
+                        that._objectOfData["numberOfTries"] = 1;
                       }
-                      this._startingTime = new Date().getTime();
-                      this._state = TimerState.Running;
-                      this._statusBarItemButtonStop.show();
-                      this._statusBarItemTimer.show();
-                      this._statusBarItemDescription.show();
-                      this._statusBarItemButtonMoveOn.show();
-                      this._statusBarItemButtonReturnTo.show();
+                      that._startingTime = new Date().getTime();
+                      that._state = TimerState.Running;
+                      that._statusBarItemButtonStop.show();
+                      that._statusBarItemTimer.show();
+                      that._statusBarItemDescription.show();
+                      that._statusBarItemButtonMoveOn.show();
+                      that._statusBarItemButtonReturnTo.show();
 
-                      this._timer = this.initiateIntervalForTimer();
+                      that._timer = that.initiateIntervalForTimer();
 
-                      this.registerCommandsDuringTheStart(context);
+                      that.registerCommandsDuringTheStart(context);
                     });
                   }
                 }
@@ -263,28 +269,26 @@ export class Timer {
               if (name === undefined) {
                 return;
               } else {
-                this._objectOfData["name"] = name.trim();
-                this._objectOfData["numberOfTries"] = 1;
+                that._objectOfData["name"] = name.trim();
+                that._objectOfData["numberOfTries"] = 1;
               }
-              this._startingTime = new Date().getTime();
-              this._state = TimerState.Running;
-              this._statusBarItemButtonStop.show();
-              this._statusBarItemTimer.show();
-              this._statusBarItemDescription.show();
-              this._statusBarItemButtonMoveOn.show();
-              this._statusBarItemButtonReturnTo.show();
+              that._startingTime = new Date().getTime();
+              that._state = TimerState.Running;
+              that._statusBarItemButtonStop.show();
+              that._statusBarItemTimer.show();
+              that._statusBarItemDescription.show();
+              that._statusBarItemButtonMoveOn.show();
+              that._statusBarItemButtonReturnTo.show();
 
-              this._timer = this.initiateIntervalForTimer();
+              that._timer = that.initiateIntervalForTimer();
 
-              this.registerCommandsDuringTheStart(context);
+              that.registerCommandsDuringTheStart(context);
             });
           }
         }
       }
     );
   }
-
-  public testCallback = () => {};
 
   public registerCommandsDuringTheStart(context: vscode.ExtensionContext) {
     let timerPauseRestart = vscode.commands.registerCommand(
