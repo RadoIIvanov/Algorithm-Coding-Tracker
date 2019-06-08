@@ -16,7 +16,6 @@ interface TimeInfoObjectInterface {
 }
 
 interface TempObjToStoreUserInputsAtTheEndOfACodingSession {
-  platform: string;
   classifiedDifficulty: string;
   percentAcceptedSubmissions: number | string;
 }
@@ -73,9 +72,6 @@ export class Timer {
   /// Local variable to store context - useful if you want to keep only one active instance of timer across all vscode instances
   private _context: vscode.ExtensionContext; //// this needs to be evaluated
 
-  /// boolean variable to signal whether we are returning to a problem we have tried previously
-  private _revisitingAProblem: boolean;
-
   constructor(context: vscode.ExtensionContext) {
     if (!this._statusBarItemTimer) {
       this._statusBarItemButtonStop = vscode.window.createStatusBarItem(
@@ -131,7 +127,6 @@ export class Timer {
 
       this._currentPlatforms = platforms;
       this._problemDifficulty = problemDifficulty;
-      this._revisitingAProblem = false;
 
       /// initialize the event emitter for prolonged stages
       this._eventEmitterForProlongedStages = new vscode.EventEmitter<
@@ -198,25 +193,32 @@ export class Timer {
                   return;
                 } else {
                   if (answer === "Yes") {
-                    let namesOfIncompleteChallenges = incompleteChallenges.map(
-                      ({ name }) => name
+                    let identifiersForIncompleteChallenges = incompleteChallenges.map(
+                      ({ name, platform }) => `${name} | ${platform}`
                     );
                     vscode.window
-                      .showQuickPick(namesOfIncompleteChallenges)
-                      .then(name => {
-                        if (name === undefined) {
+                      .showQuickPick(identifiersForIncompleteChallenges)
+                      .then(identifier => {
+                        if (identifier === undefined) {
                           return;
                         } else {
                           let dataOfChosenIncomplete = incompleteChallenges.filter(
-                            ({ name: nameOfIncomplete }) =>
-                              nameOfIncomplete === name
+                            ({ name, platform }) => {
+                              let [
+                                chosenName,
+                                chosenPlatform
+                              ] = identifier.split(" | ");
+                              return (
+                                chosenName === name &&
+                                chosenPlatform === platform
+                              );
+                            }
                           );
 
                           for (let property in dataOfChosenIncomplete[0]) {
                             that._objectOfData[property] =
                               dataOfChosenIncomplete[0][property];
                           }
-                          that._revisitingAProblem = true;
                           that._objectOfData["numberOfTries"]++;
                           that._startingTime = new Date().getTime();
                           that._state = TimerState.Running;
@@ -243,18 +245,27 @@ export class Timer {
                       } else {
                         that._objectOfData["name"] = name.trim();
                         that._objectOfData["numberOfTries"] = 1;
+                        vscode.window
+                          .showQuickPick(this._currentPlatforms)
+                          .then(platform => {
+                            if (platform === undefined) {
+                              return;
+                            } else {
+                              that._objectOfData["platform"] = platform;
+                              that._startingTime = new Date().getTime();
+                              that._state = TimerState.Running;
+                              that._statusBarItemButtonStop.show();
+                              that._statusBarItemTimer.show();
+                              that._statusBarItemDescription.show();
+                              that._statusBarItemButtonMoveOn.show();
+                              that._statusBarItemButtonReturnTo.show();
+
+                              that._timer = that.initiateIntervalForTimer();
+
+                              that.registerCommandsDuringTheStart(context);
+                            }
+                          });
                       }
-                      that._startingTime = new Date().getTime();
-                      that._state = TimerState.Running;
-                      that._statusBarItemButtonStop.show();
-                      that._statusBarItemTimer.show();
-                      that._statusBarItemDescription.show();
-                      that._statusBarItemButtonMoveOn.show();
-                      that._statusBarItemButtonReturnTo.show();
-
-                      that._timer = that.initiateIntervalForTimer();
-
-                      that.registerCommandsDuringTheStart(context);
                     });
                   }
                 }
@@ -271,18 +282,27 @@ export class Timer {
               } else {
                 that._objectOfData["name"] = name.trim();
                 that._objectOfData["numberOfTries"] = 1;
+                vscode.window
+                  .showQuickPick(this._currentPlatforms)
+                  .then(platform => {
+                    if (platform === undefined) {
+                      return;
+                    } else {
+                      that._objectOfData["platform"] = platform;
+                      that._startingTime = new Date().getTime();
+                      that._state = TimerState.Running;
+                      that._statusBarItemButtonStop.show();
+                      that._statusBarItemTimer.show();
+                      that._statusBarItemDescription.show();
+                      that._statusBarItemButtonMoveOn.show();
+                      that._statusBarItemButtonReturnTo.show();
+
+                      that._timer = that.initiateIntervalForTimer();
+
+                      that.registerCommandsDuringTheStart(context);
+                    }
+                  });
               }
-              that._startingTime = new Date().getTime();
-              that._state = TimerState.Running;
-              that._statusBarItemButtonStop.show();
-              that._statusBarItemTimer.show();
-              that._statusBarItemDescription.show();
-              that._statusBarItemButtonMoveOn.show();
-              that._statusBarItemButtonReturnTo.show();
-
-              that._timer = that.initiateIntervalForTimer();
-
-              that.registerCommandsDuringTheStart(context);
             });
           }
         }
@@ -401,86 +421,83 @@ export class Timer {
 
   public addAdditionalUserProvidedInfoBeforeSavingTheDetailsOfTheProblem() {
     let tempObj: TempObjToStoreUserInputsAtTheEndOfACodingSession = {
-      platform: "",
       classifiedDifficulty: "",
       percentAcceptedSubmissions: 0
     };
-    vscode.window.showQuickPick(this._currentPlatforms).then(platform => {
-      if (platform === undefined) {
+    vscode.window.showQuickPick(this._problemDifficulty).then(difficulty => {
+      if (difficulty === undefined) {
         return;
       } else {
-        tempObj.platform = platform;
+        tempObj.classifiedDifficulty = difficulty;
+        let inputBoxOptions = {
+          placeHolder: "Number from 0 to 100, or unknown",
+          prompt: "The Overall Percent Of Accepted Submissions for the Problem",
+          validateInput: validatePercentAcceptedSubmissionsInputInShowBox
+        };
         vscode.window
-          .showQuickPick(this._problemDifficulty)
-          .then(difficulty => {
-            if (difficulty === undefined) {
+          .showInputBox(inputBoxOptions)
+          .then(percentAcceptedSubmissionsText => {
+            if (percentAcceptedSubmissionsText === undefined) {
               return;
             } else {
-              tempObj.classifiedDifficulty = difficulty;
-              let inputBoxOptions = {
-                placeHolder: "Number from 0 to 100, or unknown",
-                prompt:
-                  "The Overall Percent Of Accepted Submissions for the Problem",
-                validateInput: validatePercentAcceptedSubmissionsInputInShowBox
-              };
-              vscode.window
-                .showInputBox(inputBoxOptions)
-                .then(percentAcceptedSubmissionsText => {
-                  if (percentAcceptedSubmissionsText === undefined) {
-                    return;
+              if (
+                percentAcceptedSubmissionsText.toLocaleLowerCase() === "unknown"
+              ) {
+                tempObj.percentAcceptedSubmissions = percentAcceptedSubmissionsText.toLocaleLowerCase();
+              } else {
+                let percentAcceptedSubmissionsNumber = Number(
+                  percentAcceptedSubmissionsText
+                );
+                tempObj.percentAcceptedSubmissions = percentAcceptedSubmissionsNumber;
+              }
+
+              for (let key in tempObj) {
+                this._objectOfData[key] = tempObj[key];
+              }
+              this._objectOfData["dateOfCompletion"] = new Date();
+              this._objectOfData["status"] = "Complete";
+              ///// start saving process
+
+              fs.readFile(
+                this._localVariableToStoreFixedPathToDatabaseFile,
+                (err, data) => {
+                  if (err) {
+                    console.log(err);
                   } else {
-                    if (
-                      percentAcceptedSubmissionsText.toLocaleLowerCase() ===
-                      "unknown"
-                    ) {
-                      tempObj.percentAcceptedSubmissions = percentAcceptedSubmissionsText.toLocaleLowerCase();
+                    let convertBufferToString = data.toString();
+                    let jsObject = JSON.parse(convertBufferToString);
+                    if (this._objectOfData["numberOfTries"] === 1) {
+                      this._objectOfData["problemNumber"] =
+                        jsObject.data.length + 1;
+                      jsObject.data.push(this._objectOfData);
                     } else {
-                      let percentAcceptedSubmissionsNumber = Number(
-                        percentAcceptedSubmissionsText
-                      );
-                      tempObj.percentAcceptedSubmissions = percentAcceptedSubmissionsNumber;
+                      jsObject.data[
+                        this._objectOfData["problemNumber"] - 1
+                      ] = this._objectOfData;
                     }
 
-                    for (let key in tempObj) {
-                      this._objectOfData[key] = tempObj[key];
-                    }
-                    this._objectOfData["dateOfCompletion"] = new Date();
-                    this._objectOfData["status"] = "Complete";
-                    ///// start saving process
-
-                    fs.readFile(
+                    let returnDataToJSON = JSON.stringify(jsObject);
+                    fs.writeFile(
                       this._localVariableToStoreFixedPathToDatabaseFile,
-                      (err, data) => {
+                      returnDataToJSON,
+                      err => {
                         if (err) {
                           console.log(err);
                         } else {
-                          let convertBufferToString = data.toString();
-                          let jsObject = JSON.parse(convertBufferToString);
-                          jsObject.data.push(this._objectOfData);
-                          let returnDataToJSON = JSON.stringify(jsObject);
-                          fs.writeFile(
-                            this._localVariableToStoreFixedPathToDatabaseFile,
-                            returnDataToJSON,
-                            err => {
-                              if (err) {
-                                console.log(err);
-                              } else {
-                                return;
-                              }
-                            }
-                          );
+                          return;
                         }
                       }
                     );
                   }
-                });
+                }
+              );
             }
           });
       }
     });
   }
 
-  public saveIfSessionAbortedAndStop(context: vscode.ExtensionContext) {
+  public saveIfSessionAbortedORStopped(context: vscode.ExtensionContext) {
     fs.readFile(
       this._localVariableToStoreFixedPathToDatabaseFile,
       (err, data) => {
@@ -493,9 +510,15 @@ export class Timer {
           if (this._objectOfData["numberOfTries"] === 1) {
             this._objectOfData["dateOfInitialTry"] = new Date();
             this._objectOfData["status"] = "Incomplete";
+            this._objectOfData["problemNumber"] = jsObject.data.length + 1;
+            jsObject.data.push(this._objectOfData);
+          } else {
+            /// match by name and platform and overwrite - at this point don't worry about data duplicates
+            jsObject.data[
+              this._objectOfData["problemNumber"] - 1
+            ] = this._objectOfData;
           }
 
-          jsObject.data.push(this._objectOfData);
           let returnDataToJSON = JSON.stringify(jsObject);
           fs.writeFile(
             this._localVariableToStoreFixedPathToDatabaseFile,

@@ -52,7 +52,7 @@ export function activate(context: vscode.ExtensionContext) {
     "extension.algocodingtracker.stopTimer",
     () => {
       if (timer.state !== TimerState.Stopped) {
-        timer.saveIfSessionAbortedAndStop(context);
+        timer.saveIfSessionAbortedORStopped(context);
       } else {
         vscode.window.showInformationMessage("Timer is already stopped");
       }
@@ -66,5 +66,5 @@ export function activate(context: vscode.ExtensionContext) {
 // this method is called when your extension is deactivated
 export function deactivate() {
   /// this is execute just before vs code shuts down, in the case that it does
-  timer.saveIfSessionAbortedAndStop(timer.context);
+  timer.saveIfSessionAbortedORStopped(timer.context);
 }

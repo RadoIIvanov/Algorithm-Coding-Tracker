@@ -12,25 +12,27 @@ export function createWatcher(fsWaitVariable, path, protagonist, context) {
       fsWaitVariable = setTimeout(() => {
         fsWaitVariable = undefined;
       }, 100);
-      vscode.window
-        .showInformationMessage(
-          `Data was saved successfully in ${context.globalState.get(
-            "fixedPath"
-          )}. Do you want to start another session?`,
-          { modal: true },
-          ...["Yes", "No"]
-        )
-        .then(choice => {
-          if (protagonist.state !== TimerState.Stopped) {
-            protagonist.stop(context);
 
+      if (protagonist.state !== TimerState.Stopped) {
+        protagonist.stop(context);
+        vscode.window
+          .showInformationMessage(
+            `Data was saved successfully in ${context.globalState.get(
+              "fixedPath"
+            )}. Do you want to start another session?`,
+            { modal: true },
+            ...["Yes", "No"]
+          )
+          .then(choice => {
             if (choice === "Yes") {
               vscode.commands.executeCommand(
                 "extension.algocodingtracker.initiateTimer"
               );
             }
-          }
-        });
+          });
+      } else {
+        return;
+      }
     }
   });
 }
