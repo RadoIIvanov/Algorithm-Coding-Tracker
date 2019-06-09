@@ -51,7 +51,7 @@ export function activate(context: vscode.ExtensionContext) {
   let timerStop = vscode.commands.registerCommand(
     "extension.algocodingtracker.stopTimer",
     () => {
-      if (timer.state !== TimerState.Stopped) {
+      if (timer.state !== TimerState.Aborted) {
         timer.saveIfSessionAbortedORStopped(context);
       } else {
         vscode.window.showInformationMessage("Timer is already stopped");

@@ -5,7 +5,7 @@ export function reInitializeTimer(
   previousTimerInstance: Timer,
   context: vscode.ExtensionContext
 ): Timer {
-  if (previousTimerInstance.state !== TimerState.Stopped) {
+  if (previousTimerInstance.state !== TimerState.Aborted) {
     previousTimerInstance.stop(context);
   }
   let newInstanceOfTimer = new Timer(context);

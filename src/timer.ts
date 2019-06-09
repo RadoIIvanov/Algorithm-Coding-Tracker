@@ -6,8 +6,22 @@ import {
   validateNameInputInShowBox,
   validatePercentAcceptedSubmissionsInputInShowBox
 } from "./validationOfInputs";
+import { platform } from "os";
 
 //// define interface for object of data and use it instead of any (current one)
+
+interface shapeOfTheCodingData {
+  codingProcessDetails?: Array<any>;
+  name?: string;
+  platform?: string;
+  numberOfTries?: number;
+  classifiedDifficulty?: string;
+  percentAcceptedSubmissions?: number;
+  dateOfCompletion?: Date;
+  status?: string;
+  problemNumber?: number;
+  dateOfInitialTry?: Date;
+}
 
 interface TimeInfoObjectInterface {
   hours: string;
@@ -27,7 +41,8 @@ interface ProlongedTime {
 export enum TimerState {
   Running,
   Paused,
-  Stopped
+  Aborted,
+  NotNeeded
 }
 
 export class Timer {
@@ -55,7 +70,7 @@ export class Timer {
   private _destinationOfReturn: number;
 
   /// Object to hold the data of the coding session that will ultimately be appended to a json file
-  private _objectOfData: any;
+  private _objectOfData: shapeOfTheCodingData;
 
   /// additional info to describe the problem
   private _currentPlatforms: Array<string>;
@@ -164,9 +179,6 @@ export class Timer {
   }
 
   public start(context: vscode.ExtensionContext) {
-    //// check if there are previous incompletes (aborted sessions) and whether the user wants to try again or not
-    //// mark as incomplete when the timer is stopped midway as well
-
     fs.readFile(
       this._localVariableToStoreFixedPathToDatabaseFile,
       (err, data) => {
@@ -219,7 +231,7 @@ export class Timer {
                             that._objectOfData[property] =
                               dataOfChosenIncomplete[0][property];
                           }
-                          that._objectOfData["numberOfTries"]++;
+                          that._objectOfData.numberOfTries++;
                           that._startingTime = new Date().getTime();
                           that._state = TimerState.Running;
                           that._statusBarItemButtonStop.show();
@@ -243,15 +255,19 @@ export class Timer {
                       if (name === undefined) {
                         return;
                       } else {
-                        that._objectOfData["name"] = name.trim();
-                        that._objectOfData["numberOfTries"] = 1;
                         vscode.window
                           .showQuickPick(this._currentPlatforms)
                           .then(platform => {
                             if (platform === undefined) {
                               return;
                             } else {
-                              that._objectOfData["platform"] = platform;
+                              that._objectOfData[
+                                "name"
+                              ] = name.trim().toLocaleLowerCase();
+                              that._objectOfData.numberOfTries = 1;
+                              that._objectOfData.platform = platform;
+                              that._objectOfData.problemNumber =
+                                convertJSONtoJS.data.length + 1;
                               that._startingTime = new Date().getTime();
                               that._state = TimerState.Running;
                               that._statusBarItemButtonStop.show();
@@ -280,15 +296,19 @@ export class Timer {
               if (name === undefined) {
                 return;
               } else {
-                that._objectOfData["name"] = name.trim();
-                that._objectOfData["numberOfTries"] = 1;
                 vscode.window
                   .showQuickPick(this._currentPlatforms)
                   .then(platform => {
                     if (platform === undefined) {
                       return;
                     } else {
-                      that._objectOfData["platform"] = platform;
+                      that._objectOfData[
+                        "name"
+                      ] = name.trim().toLocaleLowerCase();
+                      that._objectOfData.numberOfTries = 1;
+                      that._objectOfData.platform = platform;
+                      that._objectOfData.problemNumber =
+                        convertJSONtoJS.data.length + 1;
                       that._startingTime = new Date().getTime();
                       that._state = TimerState.Running;
                       that._statusBarItemButtonStop.show();
@@ -358,7 +378,7 @@ export class Timer {
   }
 
   public stop(context: vscode.ExtensionContext) {
-    this._state = TimerState.Stopped;
+    this._state = TimerState.Aborted;
     this.dispose(context);
   }
 
@@ -454,8 +474,9 @@ export class Timer {
               for (let key in tempObj) {
                 this._objectOfData[key] = tempObj[key];
               }
-              this._objectOfData["dateOfCompletion"] = new Date();
-              this._objectOfData["status"] = "Complete";
+              this._objectOfData.dateOfCompletion = new Date();
+              this._objectOfData.status = "Complete";
+              this._state = TimerState.NotNeeded;
               ///// start saving process
 
               fs.readFile(
@@ -466,15 +487,10 @@ export class Timer {
                   } else {
                     let convertBufferToString = data.toString();
                     let jsObject = JSON.parse(convertBufferToString);
-                    if (this._objectOfData["numberOfTries"] === 1) {
-                      this._objectOfData["problemNumber"] =
-                        jsObject.data.length + 1;
-                      jsObject.data.push(this._objectOfData);
-                    } else {
-                      jsObject.data[
-                        this._objectOfData["problemNumber"] - 1
-                      ] = this._objectOfData;
-                    }
+
+                    jsObject.data[
+                      this._objectOfData.problemNumber - 1
+                    ] = this._objectOfData;
 
                     let returnDataToJSON = JSON.stringify(jsObject);
                     fs.writeFile(
@@ -507,19 +523,23 @@ export class Timer {
           let convertBufferToString = data.toString();
           let jsObject = JSON.parse(convertBufferToString);
 
-          if (this._objectOfData["numberOfTries"] === 1) {
-            this._objectOfData["dateOfInitialTry"] = new Date();
-            this._objectOfData["status"] = "Incomplete";
-            this._objectOfData["problemNumber"] = jsObject.data.length + 1;
-            jsObject.data.push(this._objectOfData);
-          } else {
-            /// match by name and platform and overwrite - at this point don't worry about data duplicates
-            jsObject.data[
-              this._objectOfData["problemNumber"] - 1
-            ] = this._objectOfData;
-          }
+          let incompleteObjectOfData: shapeOfTheCodingData = {
+            name: this._objectOfData.name,
+            platform: this._objectOfData.platform,
+            numberOfTries: this._objectOfData.numberOfTries,
+            dateOfInitialTry: new Date(),
+            status: "Incomplete",
+            problemNumber: this._objectOfData.problemNumber
+          };
+          /// match by name and platform and overwrite - at this point don't worry about data duplicates
+          jsObject.data[
+            incompleteObjectOfData.problemNumber - 1
+          ] = incompleteObjectOfData;
 
           let returnDataToJSON = JSON.stringify(jsObject);
+
+          this._state = TimerState.Aborted;
+
           fs.writeFile(
             this._localVariableToStoreFixedPathToDatabaseFile,
             returnDataToJSON,
