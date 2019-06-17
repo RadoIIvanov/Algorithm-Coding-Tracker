@@ -47,7 +47,7 @@ export function initiateWatcher(path, protagonist, context) {
   } catch (error) {
     try {
       fs.mkdirSync(pathModule.dirname(path), { recursive: true });
-      let outerObject = { data: [] };
+      let outerObject = { data: [], isTimerDeactivated: true };
       let jsonVersionOfOO = JSON.stringify(outerObject);
       fs.writeFileSync(path, jsonVersionOfOO);
       return createWatcher(fsWait, path, protagonist, context);
@@ -55,7 +55,7 @@ export function initiateWatcher(path, protagonist, context) {
       if (error.code !== "EEXIST") {
         console.log(error);
       } else {
-        let outerObject = { data: [] };
+        let outerObject = { data: [], isTimerDeactivated: true };
         let jsonVersionOfOO = JSON.stringify(outerObject);
         fs.writeFileSync(path, jsonVersionOfOO);
         return createWatcher(fsWait, path, protagonist, context);

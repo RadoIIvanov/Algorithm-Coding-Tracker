@@ -42,5 +42,9 @@ export function validatePercentAcceptedSubmissionsInputInShowBox(
     return "Numbers can only start with zero, if the following character is a decimal point.";
   }
 
+  if (Number(percent) < 0 || Number(percent) > 100) {
+    return "Numbers must be positive and less than 100";
+  }
+
   return undefined;
 }

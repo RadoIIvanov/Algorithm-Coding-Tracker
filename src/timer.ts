@@ -87,33 +87,36 @@ export class Timer {
   /// Local variable to store context - useful if you want to keep only one active instance of timer across all vscode instances
   private _context: vscode.ExtensionContext; //// this needs to be evaluated
 
+  /// Local variable to store current coding data (i.e. the one that was just read)
+  private _currentData: any;
+
   constructor(context: vscode.ExtensionContext) {
     if (!this._statusBarItemTimer) {
       this._statusBarItemButtonStop = vscode.window.createStatusBarItem(
         vscode.StatusBarAlignment.Right,
-        5
+        0.5
       );
       this._statusBarItemButtonStop.tooltip = "Stop Timer";
 
       this._statusBarItemTimer = vscode.window.createStatusBarItem(
         vscode.StatusBarAlignment.Right,
-        4
+        0.4
       );
       this._statusBarItemTimer.tooltip = "Pause or Unpause";
       this._statusBarItemDescription = vscode.window.createStatusBarItem(
         vscode.StatusBarAlignment.Right,
-        3
+        0.3
       );
       this._statusBarItemDescription.tooltip = "Stage Description";
 
       this._statusBarItemButtonMoveOn = vscode.window.createStatusBarItem(
         vscode.StatusBarAlignment.Right,
-        2
+        0.2
       );
       this._statusBarItemButtonMoveOn.tooltip = "Move To The Next Stage";
       this._statusBarItemButtonReturnTo = vscode.window.createStatusBarItem(
         vscode.StatusBarAlignment.Right,
-        1
+        0.1
       );
       this._statusBarItemButtonReturnTo.tooltip = "Return to a Previous Stage";
       this._statusBarItemTimer.text = "00:00:00";
@@ -178,155 +181,163 @@ export class Timer {
     return this._context;
   }
 
-  public start(context: vscode.ExtensionContext) {
-    fs.readFile(
-      this._localVariableToStoreFixedPathToDatabaseFile,
-      (err, data) => {
-        if (err) {
-          console.log(err);
-        } else {
-          let convertBufferToString = data.toString();
-          let convertJSONtoJS = JSON.parse(convertBufferToString);
-          let incompleteChallenges = convertJSONtoJS.data.filter(
-            ({ status }) => {
-              return status === "Incomplete";
-            }
-          );
-          let that = this;
-          if (incompleteChallenges.length) {
-            vscode.window
-              .showInformationMessage(
-                "There are unsolved problems. Do you want to try any of them again?",
-                { modal: true },
-                ...["Yes", "No"]
-              )
-              .then(answer => {
-                if (answer === undefined) {
-                  return;
-                } else {
-                  if (answer === "Yes") {
-                    let identifiersForIncompleteChallenges = incompleteChallenges.map(
-                      ({ name, platform }) => `${name} | ${platform}`
-                    );
-                    vscode.window
-                      .showQuickPick(identifiersForIncompleteChallenges)
-                      .then(identifier => {
-                        if (identifier === undefined) {
-                          return;
-                        } else {
-                          let dataOfChosenIncomplete = incompleteChallenges.filter(
-                            ({ name, platform }) => {
-                              let [
-                                chosenName,
-                                chosenPlatform
-                              ] = identifier.split(" | ");
-                              return (
-                                chosenName === name &&
-                                chosenPlatform === platform
-                              );
-                            }
-                          );
-
-                          for (let property in dataOfChosenIncomplete[0]) {
-                            that._objectOfData[property] =
-                              dataOfChosenIncomplete[0][property];
-                          }
-                          that._objectOfData.numberOfTries++;
-                          that._startingTime = new Date().getTime();
-                          that._state = TimerState.Running;
-                          that._statusBarItemButtonStop.show();
-                          that._statusBarItemTimer.show();
-                          that._statusBarItemDescription.show();
-                          that._statusBarItemButtonMoveOn.show();
-                          that._statusBarItemButtonReturnTo.show();
-
-                          that._timer = that.initiateIntervalForTimer();
-
-                          that.registerCommandsDuringTheStart(context);
-                        }
-                      });
-                  } else {
-                    let inputBoxOptions = {
-                      placeHolder: "Type the Name of the New Problem",
-                      validateInput: validateNameInputInShowBox
-                    };
-
-                    vscode.window.showInputBox(inputBoxOptions).then(name => {
-                      if (name === undefined) {
-                        return;
-                      } else {
-                        vscode.window
-                          .showQuickPick(this._currentPlatforms)
-                          .then(platform => {
-                            if (platform === undefined) {
-                              return;
-                            } else {
-                              that._objectOfData[
-                                "name"
-                              ] = name.trim().toLocaleLowerCase();
-                              that._objectOfData.numberOfTries = 1;
-                              that._objectOfData.platform = platform;
-                              that._objectOfData.problemNumber =
-                                convertJSONtoJS.data.length + 1;
-                              that._startingTime = new Date().getTime();
-                              that._state = TimerState.Running;
-                              that._statusBarItemButtonStop.show();
-                              that._statusBarItemTimer.show();
-                              that._statusBarItemDescription.show();
-                              that._statusBarItemButtonMoveOn.show();
-                              that._statusBarItemButtonReturnTo.show();
-
-                              that._timer = that.initiateIntervalForTimer();
-
-                              that.registerCommandsDuringTheStart(context);
-                            }
-                          });
-                      }
-                    });
-                  }
-                }
-              });
-          } else {
-            let inputBoxOptions = {
-              placeHolder: "Type the Name of the New Problem",
-              validateInput: validateNameInputInShowBox
-            };
-
-            vscode.window.showInputBox(inputBoxOptions).then(name => {
-              if (name === undefined) {
-                return;
-              } else {
+  public preStartChecks(
+    context: vscode.ExtensionContext,
+    codingData: any
+  ): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this._currentData = codingData;
+      let incompleteChallenges = codingData.data.filter(({ status }) => {
+        return status === "Incomplete";
+      });
+      if (incompleteChallenges.length) {
+        vscode.window
+          .showInformationMessage(
+            "There are unsolved problems. Do you want to try any of them again?",
+            { modal: true },
+            ...["Yes", "No"]
+          )
+          .then(answer => {
+            if (answer === undefined) {
+              reject();
+              this._state = TimerState.Aborted;
+              return;
+            } else {
+              if (answer === "Yes") {
+                let identifiersForIncompleteChallenges = incompleteChallenges.map(
+                  ({ name, platform }) => `${name} | ${platform}`
+                );
                 vscode.window
-                  .showQuickPick(this._currentPlatforms)
-                  .then(platform => {
-                    if (platform === undefined) {
+                  .showQuickPick(identifiersForIncompleteChallenges)
+                  .then(async identifier => {
+                    if (identifier === undefined) {
+                      reject();
+                      this._state = TimerState.Aborted;
                       return;
                     } else {
-                      that._objectOfData[
-                        "name"
-                      ] = name.trim().toLocaleLowerCase();
-                      that._objectOfData.numberOfTries = 1;
-                      that._objectOfData.platform = platform;
-                      that._objectOfData.problemNumber =
-                        convertJSONtoJS.data.length + 1;
-                      that._startingTime = new Date().getTime();
-                      that._state = TimerState.Running;
-                      that._statusBarItemButtonStop.show();
-                      that._statusBarItemTimer.show();
-                      that._statusBarItemDescription.show();
-                      that._statusBarItemButtonMoveOn.show();
-                      that._statusBarItemButtonReturnTo.show();
+                      let dataOfChosenIncomplete = incompleteChallenges.filter(
+                        ({ name, platform }) => {
+                          let [chosenName, chosenPlatform] = identifier.split(
+                            " | "
+                          );
+                          return (
+                            chosenName === name && chosenPlatform === platform
+                          );
+                        }
+                      );
 
-                      that._timer = that.initiateIntervalForTimer();
-
-                      that.registerCommandsDuringTheStart(context);
+                      for (let property in dataOfChosenIncomplete[0]) {
+                        this._objectOfData[property] =
+                          dataOfChosenIncomplete[0][property];
+                      }
+                      await context.globalState.update("timerIsOn", true);
+                      this.start(null,codingData,context);
+                      resolve();
                     }
                   });
+              } else {
+                let inputBoxOptions = {
+                  placeHolder: "Type the Name of the New Problem",
+                  validateInput: validateNameInputInShowBox
+                };
+
+                vscode.window.showInputBox(inputBoxOptions).then(name => {
+                  if (name === undefined) {
+                    reject();
+                    this._state = TimerState.Aborted;
+                    return;
+                  } else {
+                    vscode.window
+                      .showQuickPick(this._currentPlatforms)
+                      .then(async platform => {
+                        if (platform === undefined) {
+                          reject();
+                          this._state = TimerState.Aborted;
+                          return;
+                        } else {
+                          this._objectOfData[
+                            "name"
+                          ] = name.trim().toLocaleLowerCase();
+                          await context.globalState.update("timerIsOn", true);
+                          this.start(platform, codingData, context);
+                          resolve();
+                        }
+                      });
+                  }
+                });
               }
-            });
+            }
+          });
+      } else {
+        let inputBoxOptions = {
+          placeHolder: "Type the Name of the New Problem",
+          validateInput: validateNameInputInShowBox
+        };
+
+        vscode.window.showInputBox(inputBoxOptions).then(name => {
+          if (name === undefined) {
+            reject();
+            this._state = TimerState.Aborted;
+            return;
+          } else {
+            vscode.window
+              .showQuickPick(this._currentPlatforms)
+              .then(async platform => {
+                if (platform === undefined) {
+                  reject();
+                  this._state = TimerState.Aborted;
+                  return;
+                } else {
+                  this._objectOfData["name"] = name.trim().toLocaleLowerCase();
+                  await context.globalState.update("timerIsOn", true);
+                  this.start(platform, codingData, context);
+                  resolve();
+                }
+              });
           }
-        }
+        });
       }
+    });
+  }
+
+  public start(
+    platform: string,
+    codingData: any,
+    context: vscode.ExtensionContext
+  ) {
+    let returnDataToJSON = JSON.stringify(this._currentData);
+    this._fsWatcherToSignalChangesToDataFileAndDisposeResources.close();
+    try {
+      fs.writeFileSync(
+        this._localVariableToStoreFixedPathToDatabaseFile,
+        returnDataToJSON
+      );
+    } catch (error) {
+      console.log(error);
+    }
+
+    if (this._objectOfData.numberOfTries) {
+      this._objectOfData.numberOfTries++;
+    } else {
+      this._objectOfData.numberOfTries = 1;
+      this._objectOfData.platform = platform;
+      this._objectOfData.problemNumber = codingData.data.length + 1;
+    }
+    this._startingTime = new Date().getTime();
+    this._state = TimerState.Running;
+    this._statusBarItemButtonStop.show();
+    this._statusBarItemTimer.show();
+    this._statusBarItemDescription.show();
+    this._statusBarItemButtonMoveOn.show();
+    this._statusBarItemButtonReturnTo.show();
+
+    this._timer = this.initiateIntervalForTimer();
+
+    this.registerCommandsDuringTheStart(context);
+    this._fsWatcherToSignalChangesToDataFileAndDisposeResources = initiateWatcher(
+      context.globalState.get("fixedPath"),
+      this,
+      context
     );
   }
 
@@ -456,7 +467,7 @@ export class Timer {
         };
         vscode.window
           .showInputBox(inputBoxOptions)
-          .then(percentAcceptedSubmissionsText => {
+          .then(async percentAcceptedSubmissionsText => {
             if (percentAcceptedSubmissionsText === undefined) {
               return;
             } else {
@@ -474,86 +485,74 @@ export class Timer {
               for (let key in tempObj) {
                 this._objectOfData[key] = tempObj[key];
               }
+              this._objectOfData.dateOfInitialTry =
+                this._objectOfData.dateOfInitialTry === undefined
+                  ? new Date()
+                  : this._objectOfData.dateOfInitialTry;
               this._objectOfData.dateOfCompletion = new Date();
               this._objectOfData.status = "Complete";
               this._state = TimerState.NotNeeded;
               ///// start saving process
 
-              fs.readFile(
-                this._localVariableToStoreFixedPathToDatabaseFile,
-                (err, data) => {
-                  if (err) {
-                    console.log(err);
-                  } else {
-                    let convertBufferToString = data.toString();
-                    let jsObject = JSON.parse(convertBufferToString);
+              this._currentData.data[
+                this._objectOfData.problemNumber - 1
+              ] = this._objectOfData;
 
-                    jsObject.data[
-                      this._objectOfData.problemNumber - 1
-                    ] = this._objectOfData;
+              this._currentData.isTimerDeactivated = true;
 
-                    let returnDataToJSON = JSON.stringify(jsObject);
-                    fs.writeFile(
-                      this._localVariableToStoreFixedPathToDatabaseFile,
-                      returnDataToJSON,
-                      err => {
-                        if (err) {
-                          console.log(err);
-                        } else {
-                          return;
-                        }
-                      }
-                    );
-                  }
-                }
-              );
+              let returnDataToJSON = JSON.stringify(this._currentData);
+              //// this may have to be done synchronously
+
+              try {
+                fs.writeFileSync(
+                  this._localVariableToStoreFixedPathToDatabaseFile,
+                  returnDataToJSON
+                );
+              } catch (error) {
+                console.log(error);
+              }
+              await this._context.globalState.update("timerIsOn", false);
             }
           });
       }
     });
   }
 
-  public saveIfSessionAbortedORStopped(context: vscode.ExtensionContext) {
-    fs.readFile(
-      this._localVariableToStoreFixedPathToDatabaseFile,
-      (err, data) => {
-        if (err) {
-          console.log(err);
-        } else {
-          let convertBufferToString = data.toString();
-          let jsObject = JSON.parse(convertBufferToString);
+  public async saveIfSessionAbortedORStopped(context: vscode.ExtensionContext) {
+    if (this._state === TimerState.Aborted) {
+      return;
+    }
+    let incompleteObjectOfData: shapeOfTheCodingData = {
+      name: this._objectOfData.name,
+      platform: this._objectOfData.platform,
+      numberOfTries: this._objectOfData.numberOfTries,
+      dateOfInitialTry:
+        this._objectOfData.numberOfTries === 1
+          ? new Date()
+          : this._objectOfData.dateOfInitialTry,
+      status: "Incomplete",
+      problemNumber: this._objectOfData.problemNumber
+    };
+    /// match by name and platform and overwrite - at this point don't worry about data duplicates
+    this._currentData.data[
+      incompleteObjectOfData.problemNumber - 1
+    ] = incompleteObjectOfData;
 
-          let incompleteObjectOfData: shapeOfTheCodingData = {
-            name: this._objectOfData.name,
-            platform: this._objectOfData.platform,
-            numberOfTries: this._objectOfData.numberOfTries,
-            dateOfInitialTry: new Date(),
-            status: "Incomplete",
-            problemNumber: this._objectOfData.problemNumber
-          };
-          /// match by name and platform and overwrite - at this point don't worry about data duplicates
-          jsObject.data[
-            incompleteObjectOfData.problemNumber - 1
-          ] = incompleteObjectOfData;
+    this._currentData.isTimerDeactivated = true;
 
-          let returnDataToJSON = JSON.stringify(jsObject);
+    let returnDataToJSON = JSON.stringify(this._currentData);
 
-          this._state = TimerState.Aborted;
+    this._state = TimerState.Aborted;
 
-          fs.writeFile(
-            this._localVariableToStoreFixedPathToDatabaseFile,
-            returnDataToJSON,
-            err => {
-              if (err) {
-                console.log(err);
-              } else {
-                return;
-              }
-            }
-          );
-        }
-      }
-    );
+    try {
+      fs.writeFileSync(
+        this._localVariableToStoreFixedPathToDatabaseFile,
+        returnDataToJSON
+      );
+    } catch (error) {
+      console.log(error);
+    }
+    await this._context.globalState.update("timerIsOn", false);
   }
 
   public pressReturnToButton = () => {

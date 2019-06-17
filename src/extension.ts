@@ -5,6 +5,7 @@ import * as vscode from "vscode";
 import { Timer, TimerState } from "./timer";
 import { fullPath } from "./pathToDatabaseFile";
 import { reInitializeTimer } from "./functionalityToCreateAndWorkWithInstancesOfTimer";
+import { getDataToCheckDeactivationStateAndIncompletes } from "./getDataToCheckDeactivationStateAndIncompletes";
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 
@@ -28,7 +29,8 @@ export function activate(context: vscode.ExtensionContext) {
 
   let timerStart = vscode.commands.registerCommand(
     "extension.algocodingtracker.initiateTimer",
-    () => {
+    async () => {
+      let data = getDataToCheckDeactivationStateAndIncompletes();
       if (
         timer.state === TimerState.Running ||
         timer.state === TimerState.Paused
@@ -39,11 +41,30 @@ export function activate(context: vscode.ExtensionContext) {
           })
           .then(choice => {
             if (choice === "Yes") {
-              timer = reInitializeTimer(timer, context);
+              timer.saveIfSessionAbortedORStopped(context);
+              data = getDataToCheckDeactivationStateAndIncompletes();
+              timer = reInitializeTimer(timer, context, data);
             }
           });
       } else {
-        timer = reInitializeTimer(timer, context);
+        if (
+          context.globalState.get("timerIsOn") === true &&
+          data.isTimerDeactivated === false
+        ) {
+          vscode.window.showInformationMessage(
+            "Timer is already on in another instance of vscode. Please use it there."
+          );
+          timer.stop(context);
+          return;
+        } else if (
+          context.globalState.get("timerIsOn") === true &&
+          data.isTimerDeactivated === true
+        ) {
+          await context.globalState.update("timerIsOn", false);
+          data.isTimerDeactivated = false;
+        }
+        data.isTimerDeactivated = false;
+        timer = reInitializeTimer(timer, context, data);
       }
     }
   );

@@ -19,3 +19,18 @@ Include a local server that will show you an analysis of the coding data i.e. sh
 3. The default location of the data file is in the **HOME folder of the current user** (i.e. I wanted a safe placed that is changed infrequently). You can change it by modifying the **pathToDatabaseFile.ts** file. Depending on feedback, I might add it as a configurable option.
 4. Based on personal experience on where most problems arise (i.e. getting stuck), I've set up an event for the stages in which you test your pseudo code. The event will trigger if you reach the 10min mark in either of the testing stages (i.e. I thought 10 min is a reasonable limit after which you should start considering returning back to a previous stage). Depending on feedback, this might be altered and included as a configurable option.
 5. I've made assumptions with respect to 1. coding platforms, 2. problem difficulty, 3. coding stages in the process of solving algorithmic challenges. If you frequently notice that these aren't applicable/informative in your case, feel free to let me know. Additionally, you can customize the extension yourself by changing the hardcoded data in the **options.ts** file.
+6. Timer can run in only one instance of VScode at a time (i.e. It helps with consolidation of the data and avoids potential race conditions. Also, I did not see any logical reason why you'd want the timer to run in multiple instances of vscode at once). See a bug/problem related to this below.
+
+### Readme needs to include something about the structure of the data
+The structure of the data - json file holds the coding data under the data property, it holds an array of objects, each object representing the data for a particular problem.
+For each problem the coding details are under the codingDetails property of the object. This property holds an array of objects itself (i.e. index is the stage number). The objects themselves hold time and return information for the coding stages. **Special note about the return information** - if there are multiple return cycles prior to a return cycle involving a specific stage, any returns involving this specific stage will be recorded at the index in the array representing the return cycle number (i.e. at the index for the previous return cycles there will be null, signifying that the stage wasn't part of them)  
+
+### Short description of the files in the project
+extension.ts - outer controller for the extension
+timer.ts - the main timer class for the extension
+options.ts - hardcoded data to present options to the user to choose from
+pathToDatabaseFile.ts - determines the default location of the data file
+The rest of the files are helper functions to i.e. validate user inputs, create and initiate a watcher for changes in the data file and respond accordingly, work with instances of timer, read the data file etc. 
+
+### Bugs/Problems
+Extension Host crashes if you try to initiate the timer in a new vs code instance **multiple times** when the timer is already running in another instance of vs code.
