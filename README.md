@@ -33,4 +33,4 @@ pathToDatabaseFile.ts - determines the default location of the data file
 The rest of the files are helper functions to i.e. validate user inputs, create and initiate a watcher for changes in the data file and respond accordingly, work with instances of timer, read the data file etc. 
 
 ### Bugs/Problems And Their Status
-1. Extension Host crashes if you try to initiate the timer in a new vs code instance **multiple times** when the timer is already running in another instance of vs code. **Fixed**
+1. Extension Host crashes if you try to initiate the timer in a new vs code instance **multiple times** when the timer is already running in another instance of vs code. **Fixed - on commit starting with 6cc13f7**
