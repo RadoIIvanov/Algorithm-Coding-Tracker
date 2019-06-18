@@ -5,4 +5,4 @@ let homedir = os.homedir();
 let suffixToFile = "codingDetailsData.json";
 let fullPath = path.join(homedir, suffixToFile);
 
-export { fullPath };
+exports.fullPath = fullPath;

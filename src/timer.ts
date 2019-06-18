@@ -1,12 +1,13 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
-import { initiateWatcher } from "./watcher";
+import { createWatcher } from "./watcher";
 import { platforms, stageDescriptions, problemDifficulty } from "./options";
 import {
   validateNameInputInShowBox,
   validatePercentAcceptedSubmissionsInputInShowBox
 } from "./validationOfInputs";
 import { platform } from "os";
+import { create } from "domain";
 
 //// define interface for object of data and use it instead of any (current one)
 
@@ -152,12 +153,6 @@ export class Timer {
       >();
 
       if (context !== undefined) {
-        /// initiate watcher
-        this._fsWatcherToSignalChangesToDataFileAndDisposeResources = initiateWatcher(
-          context.globalState.get("fixedPath"),
-          this,
-          context
-        );
         /// initialize local variable to store fixed path
         this._localVariableToStoreFixedPathToDatabaseFile = context.globalState.get(
           "fixedPath"
@@ -231,7 +226,7 @@ export class Timer {
                           dataOfChosenIncomplete[0][property];
                       }
                       await context.globalState.update("timerIsOn", true);
-                      this.start(null,codingData,context);
+                      this.start(null, codingData, context);
                       resolve();
                     }
                   });
@@ -306,7 +301,6 @@ export class Timer {
     context: vscode.ExtensionContext
   ) {
     let returnDataToJSON = JSON.stringify(this._currentData);
-    this._fsWatcherToSignalChangesToDataFileAndDisposeResources.close();
     try {
       fs.writeFileSync(
         this._localVariableToStoreFixedPathToDatabaseFile,
@@ -333,8 +327,10 @@ export class Timer {
 
     this._timer = this.initiateIntervalForTimer();
 
+    let fsWaitVariable: NodeJS.Timer;
     this.registerCommandsDuringTheStart(context);
-    this._fsWatcherToSignalChangesToDataFileAndDisposeResources = initiateWatcher(
+    this._fsWatcherToSignalChangesToDataFileAndDisposeResources = createWatcher(
+      fsWaitVariable,
       context.globalState.get("fixedPath"),
       this,
       context
@@ -615,7 +611,10 @@ export class Timer {
     this._statusBarItemButtonMoveOn.dispose();
     this._statusBarItemButtonReturnTo.dispose();
     this._statusBarItemButtonStop.dispose();
-    this._fsWatcherToSignalChangesToDataFileAndDisposeResources.close();
+    
+    if (this._fsWatcherToSignalChangesToDataFileAndDisposeResources) {
+      this._fsWatcherToSignalChangesToDataFileAndDisposeResources.close();
+    }
 
     context.subscriptions.forEach((element, index) => {
       if (index > 1) {

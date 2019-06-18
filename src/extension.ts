@@ -1,9 +1,10 @@
 "use strict";
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
+const fullPath = require('./pathToDatabaseFile').fullPath;
+const makeDataFile = require('./createDataFile');
 import * as vscode from "vscode";
 import { Timer, TimerState } from "./timer";
-import { fullPath } from "./pathToDatabaseFile";
 import { reInitializeTimer } from "./functionalityToCreateAndWorkWithInstancesOfTimer";
 import { getDataToCheckDeactivationStateAndIncompletes } from "./getDataToCheckDeactivationStateAndIncompletes";
 // this method is called when your extension is activated
@@ -30,7 +31,7 @@ export function activate(context: vscode.ExtensionContext) {
   let timerStart = vscode.commands.registerCommand(
     "extension.algocodingtracker.initiateTimer",
     async () => {
-      let data = getDataToCheckDeactivationStateAndIncompletes();
+      let data = getDataToCheckDeactivationStateAndIncompletes(fullPath);
       if (
         timer.state === TimerState.Running ||
         timer.state === TimerState.Paused
@@ -42,7 +43,7 @@ export function activate(context: vscode.ExtensionContext) {
           .then(choice => {
             if (choice === "Yes") {
               timer.saveIfSessionAbortedORStopped(context);
-              data = getDataToCheckDeactivationStateAndIncompletes();
+              data = getDataToCheckDeactivationStateAndIncompletes(fullPath);
               timer = reInitializeTimer(timer, context, data);
             }
           });
