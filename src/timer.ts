@@ -11,7 +11,7 @@ import { create } from "domain";
 
 //// define interface for object of data and use it instead of any (current one)
 
-interface shapeOfTheCodingData {
+export interface shapeOfTheCodingData {
   codingProcessDetails?: Array<any>;
   name?: string;
   platform?: string;
@@ -372,8 +372,7 @@ export class Timer {
         (new Date().getTime() - this._startingTime) / 1000
       );
       if (
-        (this._currentIndexInTheArrOfDescriptions === 4 ||
-          this._currentIndexInTheArrOfDescriptions === 5) &&
+        this._currentIndexInTheArrOfDescriptions === 4 &&
         this._secondsElapsed === 600
       ) {
         this.fireOnProlongedEvent();

@@ -15,20 +15,17 @@ platforms = [
   "Code Fights",
   "Code Forces",
   "Other platform",
-  "Non-algo challenge - project related problem solving"
 ];
 
 problemDifficulty = ["Easy", "Medium", "Hard", "Other", "Unknown"];
 
 stageDescriptions = [
-  "Describe the Problem in 1-2 Sentences (i.e. initial input => ending output)",
-  "Generate Base Test Cases",
-  "Generate an Idea - Naive(optimize only on second pass)",
-  "Write Pseudo Code - Tasks to Pure Functions",
+  "Understand the Problem Thoroughly/Describe it in 1-2 Sentences (i.e. initial input => ending output)",
+  "Generate Base Test Cases(keep them simple, yet exhaustive)",
+  "Generate an Idea - Naive(optimize only on second pass), and Describe it in 1-2 Sentences",
+  "Write Pseudo Code - Tasks to Small Pure Functions",
   "Test PC Against Base Test Cases and Revise",
-  "Generate And Test Against More Elaborate TC - Revise if Needed",
-  "Implement PC",
-  "Execute all Tests and Eliminate any Implementation Bugs"
+  "Implement PC, Test, And Fix any Implementation Bugs",
 ];
 
 export { platforms, problemDifficulty, stageDescriptions };
