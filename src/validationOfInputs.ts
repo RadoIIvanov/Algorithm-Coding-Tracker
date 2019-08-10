@@ -1,6 +1,6 @@
 import { strict } from "assert";
 
-/* Do validation upfront to avoid "malicious inputs" (i.e. a lot of consecutive spaces characters in the middle)
+/* Do validation upfront to avoid "malicious inputs" (i.e. a lot of consecutive space characters in the middle)
 that ultimately would have to be cleaned up */
 
 export function validateNameInputInShowBox(str: string | undefined) {

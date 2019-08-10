@@ -6,6 +6,7 @@ import {
   validateNameInputInShowBox,
   validatePercentAcceptedSubmissionsInputInShowBox
 } from "./validationOfInputs";
+import {outerShapeOfTheCodingFile} from "./getDataToCheckDeactivationStateAndIncompletes";
 import { platform } from "os";
 import { create } from "domain";
 
@@ -17,11 +18,15 @@ export interface shapeOfTheCodingData {
   platform?: string;
   numberOfTries?: number;
   classifiedDifficulty?: string;
-  percentAcceptedSubmissions?: number;
+  percentAcceptedSubmissions?: number | string;
   dateOfCompletion?: Date;
   status?: string;
   problemNumber?: number;
   dateOfInitialTry?: Date;
+  totalTime?: number;
+  totalReturns?: number;
+  totalReturnsToGI?: number;
+  numberOfReturnCyclesFasterThanPreviousCounterparts?: number;
 }
 
 interface TimeInfoObjectInterface {
@@ -82,14 +87,21 @@ export class Timer {
   /// Create a local version of the fixed path to the database file that is stored in globalState, so that you don't have to pass the context as argument everytime
   private _localVariableToStoreFixedPathToDatabaseFile: string;
 
-  /// Event emitter for prolonged stage (i.e. will apply to the 4th and 5th stages, which are more likely)
+  /// Event emitter for prolonged stage
   private _eventEmitterForProlongedStages: vscode.EventEmitter<ProlongedTime>;
 
   /// Local variable to store context - useful if you want to keep only one active instance of timer across all vscode instances
   private _context: vscode.ExtensionContext; //// this needs to be evaluated
 
-  /// Local variable to store current coding data (i.e. the one that was just read)
-  private _currentData: any;
+  /// Local variable to store current coding data (i.e. the one that was just read from the file)
+  private _currentData: outerShapeOfTheCodingFile ;
+
+  /// variables to store needed data for determining number of return cycles faster than the previous cycle (whether initial, or previous return cycle)
+  private _arrOfTimesPreviousCycle: number[];
+  private _currentReturnCycleRunningTime: number;
+  private _arrOfIndicesOfOriginsOfReturns: number[];
+  private _arrOfBenchmarks: number[];
+  private _arrOfRunningTimeForIncompletedReturnCycles: number[];
 
   constructor(context: vscode.ExtensionContext) {
     if (!this._statusBarItemTimer) {
@@ -141,7 +153,8 @@ export class Timer {
         this._currentIndexInTheArrOfDescriptions
       ] = {
         initialVisitTime: undefined,
-        returnBackVisits: []
+        returnBackVisits: [],
+        totalStageTime: undefined
       };
 
       this._currentPlatforms = platforms;
@@ -312,11 +325,23 @@ export class Timer {
 
     if (this._objectOfData.numberOfTries) {
       this._objectOfData.numberOfTries++;
+      this._objectOfData.totalTime = 0;
+      this._objectOfData.totalReturnsToGI = 0;
+      this._objectOfData.numberOfReturnCyclesFasterThanPreviousCounterparts = 0;
     } else {
       this._objectOfData.numberOfTries = 1;
       this._objectOfData.platform = platform;
       this._objectOfData.problemNumber = codingData.data.length + 1;
+      this._objectOfData.totalTime = 0;
+      this._objectOfData.totalReturnsToGI = 0; 
+      this._objectOfData.numberOfReturnCyclesFasterThanPreviousCounterparts = 0;
     }
+    this._arrOfBenchmarks = [];
+    this._arrOfIndicesOfOriginsOfReturns = [];
+    this._arrOfRunningTimeForIncompletedReturnCycles = [];
+    this._arrOfTimesPreviousCycle = [];
+    this._currentReturnCycleRunningTime = 0;
+
     this._startingTime = new Date().getTime();
     this._state = TimerState.Running;
     this._statusBarItemButtonStop.show();
@@ -409,6 +434,10 @@ export class Timer {
       this._objectOfData.codingProcessDetails[
         this._currentIndexInTheArrOfDescriptions
       ].initialVisitTime = this._secondsElapsed;
+      this._objectOfData.codingProcessDetails[
+        this._currentIndexInTheArrOfDescriptions
+      ].totalStageTime = this._secondsElapsed;
+      this._objectOfData.totalTime += this._secondsElapsed;
     } else {
       let returnBackDetails = {
         additionalTime: this._secondsElapsed,
@@ -417,7 +446,33 @@ export class Timer {
       this._objectOfData.codingProcessDetails[
         this._currentIndexInTheArrOfDescriptions
       ].returnBackVisits[this._numberOfReturns - 1] = returnBackDetails;
+      this._objectOfData.codingProcessDetails[
+        this._currentIndexInTheArrOfDescriptions
+      ].totalStageTime += this._secondsElapsed;
+      this._objectOfData.totalTime += this._secondsElapsed;
     }
+    this._arrOfTimesPreviousCycle[this._currentIndexInTheArrOfDescriptions] = this._secondsElapsed;
+    if (this._arrOfIndicesOfOriginsOfReturns.length === 0) {
+      /// do nothing
+    } else {
+      this._currentReturnCycleRunningTime += this._secondsElapsed;
+
+      if (this._arrOfIndicesOfOriginsOfReturns[this._arrOfIndicesOfOriginsOfReturns.length - 1] === this._currentIndexInTheArrOfDescriptions + 1) {
+        let bench = this._arrOfBenchmarks.pop();
+        this._arrOfIndicesOfOriginsOfReturns.pop();
+
+        if (this._currentReturnCycleRunningTime < bench) {
+          this._objectOfData.numberOfReturnCyclesFasterThanPreviousCounterparts++;
+        }
+
+        if (this._arrOfRunningTimeForIncompletedReturnCycles.length !== 0) {
+          this._currentReturnCycleRunningTime += this._arrOfRunningTimeForIncompletedReturnCycles.pop();
+        } else {
+          this._currentReturnCycleRunningTime = 0;
+        }
+      }
+    }
+
     if (
       this._currentIndexInTheArrOfDescriptions ===
       this._arrOfDescriptions.length - 1
@@ -439,7 +494,8 @@ export class Timer {
           this._currentIndexInTheArrOfDescriptions
         ] = {
           initialVisitTime: undefined,
-          returnBackVisits: []
+          returnBackVisits: [],
+          totalStageTime: undefined,
         };
       }
     }
@@ -486,6 +542,7 @@ export class Timer {
                   : this._objectOfData.dateOfInitialTry;
               this._objectOfData.dateOfCompletion = new Date();
               this._objectOfData.status = "Complete";
+              this._objectOfData.totalReturns = this._numberOfReturns;
               this._state = TimerState.NotNeeded;
               ///// start saving process
 
@@ -574,6 +631,10 @@ export class Timer {
       this._objectOfData.codingProcessDetails[
         this._currentIndexInTheArrOfDescriptions
       ].initialVisitTime = this._secondsElapsed;
+      this._objectOfData.codingProcessDetails[
+        this._currentIndexInTheArrOfDescriptions
+      ].totalStageTime = this._secondsElapsed;
+      this._objectOfData.totalTime += this._secondsElapsed;
     } else {
       let returnBackDetails = {
         additionalTime: this._secondsElapsed,
@@ -582,6 +643,10 @@ export class Timer {
       this._objectOfData.codingProcessDetails[
         this._currentIndexInTheArrOfDescriptions
       ].returnBackVisits[this._numberOfReturns - 1] = returnBackDetails;
+      this._objectOfData.codingProcessDetails[
+        this._currentIndexInTheArrOfDescriptions
+      ].totalStageTime += this._secondsElapsed;
+      this._objectOfData.totalTime += this._secondsElapsed;
     }
 
     this._originOfReturn = this._currentIndexInTheArrOfDescriptions;
@@ -591,6 +656,18 @@ export class Timer {
     this._destinationOfReturn = this._currentIndexInTheArrOfDescriptions;
     this._returnBackVisit = true;
     this._numberOfReturns += 1;
+
+    if (this._arrOfIndicesOfOriginsOfReturns.length !== 0) {
+      this._arrOfRunningTimeForIncompletedReturnCycles.push(this._currentReturnCycleRunningTime);
+    }
+    this._arrOfIndicesOfOriginsOfReturns.push(this._originOfReturn);
+    this._arrOfBenchmarks.push(this.generateBenchmarkForReturnCycle(this._destinationOfReturn, this._originOfReturn, this._arrOfTimesPreviousCycle));
+    this._currentReturnCycleRunningTime = 0;
+
+    if (this._destinationOfReturn === 2) {
+      this._objectOfData.totalReturnsToGI += 1;
+    }
+
     this._statusBarItemDescription.text = this._arrOfDescriptions[
       this._currentIndexInTheArrOfDescriptions
     ];
@@ -672,6 +749,12 @@ export class Timer {
       seconds: this.leadingZeroTimeFormat(newSeconds)
     };
   }
-}
 
-/*  */
+  private generateBenchmarkForReturnCycle (returnedToIndex : number, returnedFromIndex : number, arrOfTimesPreviousCycle: number[]) : number {
+    let totalTimePreviousCycle = 0;
+    for (let i = returnedToIndex; i < returnedFromIndex; ++i) {
+      totalTimePreviousCycle += arrOfTimesPreviousCycle[i];
+    }
+    return totalTimePreviousCycle;
+  }
+}
