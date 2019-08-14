@@ -6,28 +6,9 @@ import {
   validateNameInputInShowBox,
   validatePercentAcceptedSubmissionsInputInShowBox
 } from "./validationOfInputs";
-import {outerShapeOfTheCodingFile} from "./getDataToCheckDeactivationStateAndIncompletes";
 import { platform } from "os";
 import { create } from "domain";
-
-//// define interface for object of data and use it instead of any (current one)
-
-export interface shapeOfTheCodingData {
-  codingProcessDetails?: Array<any>;
-  name?: string;
-  platform?: string;
-  numberOfTries?: number;
-  classifiedDifficulty?: string;
-  percentAcceptedSubmissions?: number | string;
-  dateOfCompletion?: Date;
-  status?: string;
-  problemNumber?: number;
-  dateOfInitialTry?: Date;
-  totalTime?: number;
-  totalReturns?: number;
-  totalReturnsToGI?: number;
-  numberOfReturnCyclesFasterThanPreviousCounterparts?: number;
-}
+import {outerShapeOfTheCodingFile, shapeOfTheCodingData} from "./dataStructureInterfaces";
 
 interface TimeInfoObjectInterface {
   hours: string;
