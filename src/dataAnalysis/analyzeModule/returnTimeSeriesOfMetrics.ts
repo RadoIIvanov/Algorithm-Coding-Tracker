@@ -76,21 +76,6 @@ const calculatePercentOfProblemsThatSatisfyStageDistribution = function(
   return totalProblemsThatSatisfyStageDistribution / totalNumberOfProblems;
 };
 
-const calculatePercentOfIncompletes = function(
-  groupOfProblems: shapeOfTheCodingData[]
-): number {
-  let totalIncompletes = 0;
-  let totalNumberOfProblems = groupOfProblems.length;
-
-  for (let i = 0; i < totalNumberOfProblems; ++i) {
-    let currentProblem = groupOfProblems[i];
-    if (currentProblem.status === "Incomplete") {
-      totalIncompletes += 1;
-    }
-  }
-  return totalIncompletes / totalNumberOfProblems;
-};
-
 const calculatePercentOfOneReturnProblemsFromTRP = function(
   groupOfProblems: shapeOfTheCodingData[]
 ): number {
@@ -139,7 +124,6 @@ const returnTimeSeriesOfMetrics = function(
     averageTries: [],
     returnsToGIvsTotalReturns: [],
     percentOfProblemsThatSatisfyStageDistribution: [],
-    percentOfIncompletes: [],
     percentOfOneReturnProblemsFromTotalReturnProblems: [],
     percentOfReturnsWithHoneInProperty: []
     //// note : functionality to present the user the problems that took really long (i.e. more than 2 hours) needs to be done serparately
@@ -160,9 +144,6 @@ const returnTimeSeriesOfMetrics = function(
       calculatePercentOfProblemsThatSatisfyStageDistribution(
         groupOfProblemsToAnalyze
       )
-    );
-    objectOfTimeSeries.percentOfIncompletes.push(
-      calculatePercentOfIncompletes(groupOfProblemsToAnalyze)
     );
     objectOfTimeSeries.percentOfOneReturnProblemsFromTotalReturnProblems.push(
       calculatePercentOfOneReturnProblemsFromTRP(groupOfProblemsToAnalyze)

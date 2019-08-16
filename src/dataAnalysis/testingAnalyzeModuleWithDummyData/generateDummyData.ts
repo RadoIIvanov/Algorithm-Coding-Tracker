@@ -111,15 +111,16 @@ const createNewProblem = function(): shapeOfTheCodingData {
   return newProblem;
 };
 
-const generateDummyData = function(): outerShapeOfTheCodingFile {
+const generateDummyData = function(numberOfTotalProblems): outerShapeOfTheCodingFile {
   let outerObject: outerShapeOfTheCodingFile = {
     data: []
   };
 
-  for (let i = 0; i < 10; ++i) {
+  for (let i = 0; i < numberOfTotalProblems; ++i) {
     outerObject.data.push(createNewProblem());
   }
 
   return outerObject;
 };
 
+export {generateDummyData};

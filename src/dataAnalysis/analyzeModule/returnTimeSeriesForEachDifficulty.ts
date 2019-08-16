@@ -25,4 +25,5 @@ const returnTimeSeriesForEachDifficulty = function(
   return arrofTimeSeriesForEachDifficulty;
 };
 
+export {returnTimeSeriesForEachDifficulty};
 

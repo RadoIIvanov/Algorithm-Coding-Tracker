@@ -54,7 +54,7 @@ const checkIfCleanUpRequirementsAreMet = function(
   returnToGITimeReq: number = 60
 ): boolean {
   return (
-    problem.total > totalTimeReq &&
+    problem.totalTime > totalTimeReq &&
     stageTTGreaterThan(problem.codingProcessDetails, stageTimeReq) &&
     returnToGIGreaterThan(
       problem.codingProcessDetails[2].returnBackVisits,
@@ -104,7 +104,7 @@ const splitDataAccordingToCDMeasure = function(
     } else if (currentProblem.percentAcceptedSubmissions >= 30) {
       splitData[1].push(currentProblem);
     } else if (currentProblem.percentAcceptedSubmissions < 30) {
-      currentProblem[2].push(currentProblem);
+      splitData[2].push(currentProblem);
     }
   }
 
@@ -187,4 +187,5 @@ const returnCleanAndSplitData = function(
   return splitFurtherInGroups;
 };
 
-export {returnCleanAndSplitData};
+export {cleanUpData};
+export { returnCleanAndSplitData };

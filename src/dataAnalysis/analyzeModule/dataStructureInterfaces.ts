@@ -3,7 +3,6 @@ export interface shapeOfTimeSeriesObject {
     averageTries: number[];
     returnsToGIvsTotalReturns: number[];
     percentOfProblemsThatSatisfyStageDistribution: number[];
-    percentOfIncompletes: number[];
     percentOfOneReturnProblemsFromTotalReturnProblems: number[];
     percentOfReturnsWithHoneInProperty: number[];
   }
