@@ -2,8 +2,8 @@
 These problems will be after data cleanup, however without any kind of data split.
  */
 
-import {outerShapeOfTheCodingFile, shapeOfTheCodingData, shapeOfCodingDetailsForAStageInAProblem, shapeOfObjectForReturnBackVisitsOfAStage} from "../../dataStructureInterfaces";
-import {cleanUpData} from "../analyzeModule/cleanAndSplitData";
+import {outerShapeOfTheCodingFile, shapeOfTheCodingData, shapeOfCodingDetailsForAStageInAProblem, shapeOfObjectForReturnBackVisitsOfAStage} from "../../../dataStructureInterfaces";
+import {cleanUpData} from "../cleanAndSplitData";
 
 const returnInfoForProblemsWithTTof = function(
   file: outerShapeOfTheCodingFile,

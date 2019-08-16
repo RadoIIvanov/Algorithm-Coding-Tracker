@@ -21,17 +21,17 @@ Include a local server that will show you an analysis of the coding data i.e. sh
 5. I've made assumptions with respect to 1. coding platforms, 2. problem difficulty, 3. coding stages in the process of solving algorithmic challenges. If you frequently notice that these aren't applicable/informative in your case, feel free to let me know. Additionally, you can customize the extension yourself by changing the hardcoded data in the **options.ts** file.
 6. Timer can run in only one instance of VScode at a time (i.e. It helps with consolidation of the data and avoids potential race conditions. Also, I did not see any logical reason why you'd want the timer to run in multiple instances of vscode at once). See a bug/problem related to this below.
 
-### The Structure of the Data
+## The Structure of the Data
 A json file holds the coding data under the data property, it holds an array of objects, each object representing the data for a particular problem.
 For each problem the coding details are under the codingDetails property of the object. This property holds an array of objects itself (i.e. index is the stage number). The objects themselves hold time and return information for the coding stages. **Special note about the return information** - if there are multiple return cycles prior to a return cycle involving a specific stage, any returns involving this specific stage will be recorded at the index in the array representing the return cycle number (i.e. at the index for the previous return cycles there will be null, signifying that the stage wasn't part of them)  
 
-### Short description of the main files in the project
-extension.ts - outer controller for the extension
-timer.ts - the main timer class for the extension
-options.ts - hardcoded data to present options to the user to choose from
-pathToDatabaseFile.ts - determines the default location of the data file
-The rest of the files are helper functions to i.e. validate user inputs, create and initiate a watcher for changes in the data file and respond accordingly, work with instances of timer, read the data file etc. 
-/helperFunctionsForDataAnalysis folder - contains all the code needed for the data analysis 
+## Short description of the main files in the project
+..* extension.ts - outer controller for the extension
+..* timer.ts - the main timer class for the extension
+..* options.ts - hardcoded data to present options to the user to choose from
+..* pathToDatabaseFile.ts - determines the default location of the data file
+..* The rest of the files are helper functions to i.e. validate user inputs, create and initiate a watcher for changes in the data file and respond accordingly, work with instances of timer, read the data file etc. 
+..* /dataAnalysis folder - contains all the code needed for the data analysis 
 
-### Bugs/Problems And Their Status
+## Bugs/Problems And Their Status
 1. Extension Host crashes if you try to initiate the timer in a new vs code instance **multiple times** when the timer is already running in another instance of vs code. **Fixed - on commit starting with 6cc13f7**

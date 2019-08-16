@@ -6,7 +6,7 @@ import {
   shapeOfTheCodingData,
   shapeOfCodingDetailsForAStageInAProblem,
   shapeOfObjectForReturnBackVisitsOfAStage
-} from "../../dataStructureInterfaces";
+} from "../../../dataStructureInterfaces";
 
 const splitDataInSequentialGroupsDerivative = function(
   data: Array<shapeOfTheCodingData>,
