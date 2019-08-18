@@ -6,18 +6,17 @@ platforms = [
   "Hacker Rank",
   "Leet Code",
   "CodeChef",
-  "Code Wars",
+  "Code Wars",  /// non typical difficulty
   "Challenge Rocket",
   "Coder Byte",
   "Codin Game",
   "Top Coder",
-  "Project Euler",
-  "Code Fights",
-  "Code Forces",
+  "Code Fights/Code Signal",
+  "Code Forces",  /// non typical difficulty
+  "SPOJ",
+  "Exercism",
   "Other platform",
 ];
-
-problemDifficulty = ["Easy", "Medium", "Hard", "Other", "Unknown"];
 
 stageDescriptions = [
   "Understand the Problem Thoroughly/Describe it in 1-2 Sentences (i.e. initial input => ending output)",

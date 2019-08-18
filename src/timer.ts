@@ -1,14 +1,18 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
 import { createWatcher } from "./watcher";
-import { platforms, stageDescriptions, problemDifficulty } from "./options";
+import { platforms, stageDescriptions } from "./options";
 import {
   validateNameInputInShowBox,
-  validatePercentAcceptedSubmissionsInputInShowBox
+  validatePercentAcceptedSubmissionsInputInShowBox,
+  validateClassifiedDifficulty
 } from "./validationOfInputs";
 import { platform } from "os";
 import { create } from "domain";
-import {outerShapeOfTheCodingFile, shapeOfTheCodingData} from "./dataStructureInterfaces";
+import {
+  outerShapeOfTheCodingFile,
+  shapeOfTheCodingData
+} from "./dataStructureInterfaces";
 
 interface TimeInfoObjectInterface {
   hours: string;
@@ -61,7 +65,6 @@ export class Timer {
 
   /// additional info to describe the problem
   private _currentPlatforms: Array<string>;
-  private _problemDifficulty: Array<string>;
 
   /// FSWatcher to signal changes to the data file, so that we start the disposal of resources
   private _fsWatcherToSignalChangesToDataFileAndDisposeResources: fs.FSWatcher;
@@ -75,7 +78,7 @@ export class Timer {
   private _context: vscode.ExtensionContext; //// this needs to be evaluated
 
   /// Local variable to store current coding data (i.e. the one that was just read from the file)
-  private _currentData: outerShapeOfTheCodingFile ;
+  private _currentData: outerShapeOfTheCodingFile;
 
   /// variables to store needed data for determining number of return cycles faster than the previous cycle (whether initial, or previous return cycle)
   private _arrOfTimesPreviousCycle: number[];
@@ -139,7 +142,6 @@ export class Timer {
       };
 
       this._currentPlatforms = platforms;
-      this._problemDifficulty = problemDifficulty;
 
       /// initialize the event emitter for prolonged stages
       this._eventEmitterForProlongedStages = new vscode.EventEmitter<
@@ -314,7 +316,7 @@ export class Timer {
       this._objectOfData.platform = platform;
       this._objectOfData.problemNumber = codingData.data.length + 1;
       this._objectOfData.totalTime = 0;
-      this._objectOfData.totalReturnsToGI = 0; 
+      this._objectOfData.totalReturnsToGI = 0;
       this._objectOfData.numberOfReturnCyclesFasterThanPreviousCounterparts = 0;
     }
     this._arrOfBenchmarks = [];
@@ -432,18 +434,26 @@ export class Timer {
       ].totalStageTime += this._secondsElapsed;
       this._objectOfData.totalTime += this._secondsElapsed;
     }
-    this._arrOfTimesPreviousCycle[this._currentIndexInTheArrOfDescriptions] = this._secondsElapsed;
+    this._arrOfTimesPreviousCycle[
+      this._currentIndexInTheArrOfDescriptions
+    ] = this._secondsElapsed;
     if (this._arrOfIndicesOfOriginsOfReturns.length === 0) {
       /// do nothing
     } else {
       this._currentReturnCycleRunningTime += this._secondsElapsed;
 
-      if (this._arrOfIndicesOfOriginsOfReturns[this._arrOfIndicesOfOriginsOfReturns.length - 1] === this._currentIndexInTheArrOfDescriptions + 1) {
+      if (
+        this._arrOfIndicesOfOriginsOfReturns[
+          this._arrOfIndicesOfOriginsOfReturns.length - 1
+        ] ===
+        this._currentIndexInTheArrOfDescriptions + 1
+      ) {
         let bench = this._arrOfBenchmarks.pop();
         this._arrOfIndicesOfOriginsOfReturns.pop();
 
         if (this._currentReturnCycleRunningTime < bench) {
-          this._objectOfData.numberOfReturnCyclesFasterThanPreviousCounterparts++;
+          this._objectOfData
+            .numberOfReturnCyclesFasterThanPreviousCounterparts++;
         }
 
         if (this._arrOfRunningTimeForIncompletedReturnCycles.length !== 0) {
@@ -476,7 +486,7 @@ export class Timer {
         ] = {
           initialVisitTime: undefined,
           returnBackVisits: [],
-          totalStageTime: undefined,
+          totalStageTime: undefined
         };
       }
     }
@@ -487,7 +497,13 @@ export class Timer {
       classifiedDifficulty: "",
       percentAcceptedSubmissions: 0
     };
-    vscode.window.showQuickPick(this._problemDifficulty).then(difficulty => {
+    let inputBoxOptions = {
+      placeHolder: "easy/medium/hard or unknown",
+      prompt:
+        "How the platform categorizes the problem, if it uses non-typical classification, try to classify it relatively yourself",
+      validateInput: validateClassifiedDifficulty
+    };
+    vscode.window.showInputBox(inputBoxOptions).then(difficulty => {
       if (difficulty === undefined) {
         return;
       } else {
@@ -639,10 +655,18 @@ export class Timer {
     this._numberOfReturns += 1;
 
     if (this._arrOfIndicesOfOriginsOfReturns.length !== 0) {
-      this._arrOfRunningTimeForIncompletedReturnCycles.push(this._currentReturnCycleRunningTime);
+      this._arrOfRunningTimeForIncompletedReturnCycles.push(
+        this._currentReturnCycleRunningTime
+      );
     }
     this._arrOfIndicesOfOriginsOfReturns.push(this._originOfReturn);
-    this._arrOfBenchmarks.push(this.generateBenchmarkForReturnCycle(this._destinationOfReturn, this._originOfReturn, this._arrOfTimesPreviousCycle));
+    this._arrOfBenchmarks.push(
+      this.generateBenchmarkForReturnCycle(
+        this._destinationOfReturn,
+        this._originOfReturn,
+        this._arrOfTimesPreviousCycle
+      )
+    );
     this._currentReturnCycleRunningTime = 0;
 
     if (this._destinationOfReturn === 2) {
@@ -668,7 +692,7 @@ export class Timer {
     this._statusBarItemButtonMoveOn.dispose();
     this._statusBarItemButtonReturnTo.dispose();
     this._statusBarItemButtonStop.dispose();
-    
+
     if (this._fsWatcherToSignalChangesToDataFileAndDisposeResources) {
       this._fsWatcherToSignalChangesToDataFileAndDisposeResources.close();
     }
@@ -731,7 +755,11 @@ export class Timer {
     };
   }
 
-  private generateBenchmarkForReturnCycle (returnedToIndex : number, returnedFromIndex : number, arrOfTimesPreviousCycle: number[]) : number {
+  private generateBenchmarkForReturnCycle(
+    returnedToIndex: number,
+    returnedFromIndex: number,
+    arrOfTimesPreviousCycle: number[]
+  ): number {
     let totalTimePreviousCycle = 0;
     for (let i = returnedToIndex; i < returnedFromIndex; ++i) {
       totalTimePreviousCycle += arrOfTimesPreviousCycle[i];

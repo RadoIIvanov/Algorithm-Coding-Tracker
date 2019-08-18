@@ -3,6 +3,16 @@ import { strict } from "assert";
 /* Do validation upfront to avoid "malicious inputs" (i.e. a lot of consecutive space characters in the middle)
 that ultimately would have to be cleaned up */
 
+export function validateClassifiedDifficulty (str : string | undefined) {
+  let stringLowerCase = str.toLowerCase();
+  let regex = /easy|medium|hard|unknown/
+  if (regex.test(stringLowerCase)) {
+    return undefined;
+  } else {
+    return "Only easy/medium/hard/unknown are allowed";
+  }
+}
+
 export function validateNameInputInShowBox(str: string | undefined) {
   let regexForAtLeastOneNonSpaceCharacter = /\S/;
   if (!str || !regexForAtLeastOneNonSpaceCharacter.test(str)) {
