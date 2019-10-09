@@ -1,5 +1,5 @@
-/* 1. Uses Math.random to roll numbers from a uniform or a normal one (using transform) distribution
-2. Keep in mind that the data is incomplete but sufficient for testing the particular functions in analyzeFileHelperFunctions
+/*  1. Uses Math.random to roll numbers from a uniform or a normal one (using transform) distribution
+2. Keep in mind that the data is incomplete but sufficient for testing the particular functions in produce time series modules
 (i.e. if you change the functions you might want to increase/decrease the amount of data this module generates) */
 
 import {outerShapeOfTheCodingFile, shapeOfTheCodingData, shapeOfCodingDetailsForAStageInAProblem, shapeOfObjectForReturnBackVisitsOfAStage} from "../../dataStructureInterfaces";

@@ -1,3 +1,4 @@
+
 import {
   outerShapeOfTheCodingFile,
   shapeOfTheCodingData,
@@ -5,6 +6,7 @@ import {
   shapeOfObjectForReturnBackVisitsOfAStage
 } from "../../dataStructureInterfaces";
 import {shapeOfTimeSeriesObject} from "./dataStructureInterfaces";
+import {roundingUpToNDecimalPlaces} from "../analyzeTimeSeries/linearAlgebraOperations";
 
 const calculateAverageTT = function(
   groupOfProblems: shapeOfTheCodingData[]
@@ -113,11 +115,7 @@ const calculatePercentOfReturnsWithHoneIn = function(
 
 const returnTimeSeriesOfMetrics = function(
   dataForDifficulty: Array<Array<shapeOfTheCodingData>>
-): string | shapeOfTimeSeriesObject {
-  if (dataForDifficulty[0].length === 0) {
-    return "Not enough Data";
-  }
-
+): shapeOfTimeSeriesObject {
   let totalNumberOfGroups = dataForDifficulty.length;
   let objectOfTimeSeries = {
     averageTT: [],
@@ -132,24 +130,23 @@ const returnTimeSeriesOfMetrics = function(
   for (let i = 0; i < totalNumberOfGroups; ++i) {
     let groupOfProblemsToAnalyze = dataForDifficulty[i];
     objectOfTimeSeries.averageTT.push(
-      calculateAverageTT(groupOfProblemsToAnalyze)
+      roundingUpToNDecimalPlaces(calculateAverageTT(groupOfProblemsToAnalyze), 2)
     );
     objectOfTimeSeries.averageTries.push(
-      calculateAverageTries(groupOfProblemsToAnalyze)
+      roundingUpToNDecimalPlaces(calculateAverageTries(groupOfProblemsToAnalyze), 2)
     );
     objectOfTimeSeries.returnsToGIvsTotalReturns.push(
-      calculateReturnsToGIvsTR(groupOfProblemsToAnalyze)
+      roundingUpToNDecimalPlaces(calculateReturnsToGIvsTR(groupOfProblemsToAnalyze), 2)
     );
     objectOfTimeSeries.percentOfProblemsThatSatisfyStageDistribution.push(
-      calculatePercentOfProblemsThatSatisfyStageDistribution(
-        groupOfProblemsToAnalyze
-      )
+      roundingUpToNDecimalPlaces(calculatePercentOfProblemsThatSatisfyStageDistribution(
+        groupOfProblemsToAnalyze), 2)
     );
     objectOfTimeSeries.percentOfOneReturnProblemsFromTotalReturnProblems.push(
-      calculatePercentOfOneReturnProblemsFromTRP(groupOfProblemsToAnalyze)
+      roundingUpToNDecimalPlaces(calculatePercentOfOneReturnProblemsFromTRP(groupOfProblemsToAnalyze), 2)
     );
-    objectOfTimeSeries.percentOfReturnsWithHoneInProperty.push(
-      calculatePercentOfReturnsWithHoneIn(groupOfProblemsToAnalyze)
+    objectOfTimeSeries.percentOfReturnsWithHoneInProperty.push(roundingUpToNDecimalPlaces(
+      calculatePercentOfReturnsWithHoneIn(groupOfProblemsToAnalyze), 2)
     );
   }
 

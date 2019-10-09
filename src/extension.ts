@@ -25,7 +25,6 @@ export function activate(context: vscode.ExtensionContext) {
   if (context.globalState.get("fixedPath") === undefined) {
     context.globalState.update("fixedPath", fullPath);
   }
-
   timer = new Timer(context);
 
   let timerStart = vscode.commands.registerCommand(

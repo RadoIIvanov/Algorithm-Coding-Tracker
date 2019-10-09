@@ -16,9 +16,13 @@ const returnTimeSeriesForEachDifficulty = function(
 
   for (let i = 0; i < data.length; ++i) {
     let dataForParticularDifficulty = data[i];
-    arrofTimeSeriesForEachDifficulty.push(
-      returnTimeSeriesOfMetrics(dataForParticularDifficulty)
-    );
+    if (dataForParticularDifficulty.length === 0) {
+      arrofTimeSeriesForEachDifficulty.push("Not enough data");
+    } else {
+      arrofTimeSeriesForEachDifficulty.push(
+        returnTimeSeriesOfMetrics(dataForParticularDifficulty)
+      );
+    }
   }
   /// it will call the analysis sub-controller and pass it the array for one of the difficulties
 
