@@ -23,7 +23,7 @@ const fullPath = require('./pathToDatabaseFile').fullPath;
           let outerObject = { data: [], isTimerDeactivated: true };
           let jsonVersionOfOO = JSON.stringify(outerObject);
           fs.writeFileSync(path, jsonVersionOfOO);
-          return
+          return;
         }
       }
     }

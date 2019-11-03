@@ -1,4 +1,4 @@
-
+import {roundingUpToNDecimalPlaces} from "../analyzeTimeSeries/linearAlgebraOperations";
 import {
   outerShapeOfTheCodingFile,
   shapeOfTheCodingData,
@@ -6,7 +6,6 @@ import {
   shapeOfObjectForReturnBackVisitsOfAStage
 } from "../../dataStructureInterfaces";
 import {shapeOfTimeSeriesObject} from "./dataStructureInterfaces";
-import {roundingUpToNDecimalPlaces} from "../analyzeTimeSeries/linearAlgebraOperations";
 
 const calculateAverageTT = function(
   groupOfProblems: shapeOfTheCodingData[]
