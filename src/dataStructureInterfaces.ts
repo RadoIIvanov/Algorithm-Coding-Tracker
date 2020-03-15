@@ -30,3 +30,10 @@ export interface shapeOfObjectForReturnBackVisitsOfAStage {
   additionalTime?: number;
   returnDetails?: number[];
 }
+
+export interface objofResultsForAnObjective {
+  interceptAndSlopeData: number[]; //// 0 = intercept whole line, 1 = slope whole line, 2 = intercept last 3, 3 = slope last 3]
+  timeSeriesPoints: number[];
+  benchmark: number;
+  improveOrNot: boolean;
+}

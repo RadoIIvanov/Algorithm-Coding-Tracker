@@ -63,10 +63,10 @@ const createNewProblem = function(): shapeOfTheCodingData {
   }
   let rollForNumberOfTries = Math.random();
   newProblem.numberOfTries = Math.round(rollForNumberOfTries * 10);
-  let problemDifficulty = ["Easy", "Medium", "Hard", "Other", "Unknown"];
+  let problemDifficulty = ["easy", "medium", "hard", "unknown"];
   let rollForProblemDifficulty = Math.random();
   newProblem.classifiedDifficulty =
-    problemDifficulty[Math.round(rollForProblemDifficulty * 4)];
+    problemDifficulty[Math.round(rollForProblemDifficulty * 3)];
   let rollForKnownPercentAS = Math.random();
   if (rollForKnownPercentAS > 0.1) {
     let rollForPercentAS = Math.random();

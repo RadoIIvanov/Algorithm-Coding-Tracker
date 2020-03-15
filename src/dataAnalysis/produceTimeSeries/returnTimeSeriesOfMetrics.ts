@@ -1,11 +1,10 @@
-import {roundingUpToNDecimalPlaces} from "../analyzeTimeSeries/linearAlgebraOperations";
+import { roundingUpToNDecimalPlaces } from "../analyzeTimeSeries/linearAlgebraOperations";
 import {
   outerShapeOfTheCodingFile,
   shapeOfTheCodingData,
   shapeOfCodingDetailsForAStageInAProblem,
   shapeOfObjectForReturnBackVisitsOfAStage
 } from "../../dataStructureInterfaces";
-import {shapeOfTimeSeriesObject} from "./dataStructureInterfaces";
 
 const calculateAverageTT = function(
   groupOfProblems: shapeOfTheCodingData[]
@@ -114,41 +113,52 @@ const calculatePercentOfReturnsWithHoneIn = function(
 
 const returnTimeSeriesOfMetrics = function(
   dataForDifficulty: Array<Array<shapeOfTheCodingData>>
-): shapeOfTimeSeriesObject {
+): Array<number[]> {
   let totalNumberOfGroups = dataForDifficulty.length;
-  let objectOfTimeSeries = {
-    averageTT: [],
-    averageTries: [],
-    returnsToGIvsTotalReturns: [],
-    percentOfProblemsThatSatisfyStageDistribution: [],
-    percentOfOneReturnProblemsFromTotalReturnProblems: [],
-    percentOfReturnsWithHoneInProperty: []
-    //// note : functionality to present the user the problems that took really long (i.e. more than 2 hours) needs to be done serparately
-  };
+  let arrOfTimeSeries: Array<number[]> = [[], [], [], [], [], []]; ///  0 - ag, 1 - comp, 2- cons, 3 - hon, 4 - effi, 5 - effec, 6 - pers   /*
 
   for (let i = 0; i < totalNumberOfGroups; ++i) {
     let groupOfProblemsToAnalyze = dataForDifficulty[i];
-    objectOfTimeSeries.averageTT.push(
-      roundingUpToNDecimalPlaces(calculateAverageTT(groupOfProblemsToAnalyze), 2)
+    arrOfTimeSeries[0].push(
+      roundingUpToNDecimalPlaces(
+        calculateReturnsToGIvsTR(groupOfProblemsToAnalyze),
+        2
+      )
     );
-    objectOfTimeSeries.averageTries.push(
-      roundingUpToNDecimalPlaces(calculateAverageTries(groupOfProblemsToAnalyze), 2)
+    arrOfTimeSeries[1].push(
+      roundingUpToNDecimalPlaces(
+        calculatePercentOfOneReturnProblemsFromTRP(groupOfProblemsToAnalyze),
+        2
+      )
     );
-    objectOfTimeSeries.returnsToGIvsTotalReturns.push(
-      roundingUpToNDecimalPlaces(calculateReturnsToGIvsTR(groupOfProblemsToAnalyze), 2)
+    arrOfTimeSeries[2].push(
+      roundingUpToNDecimalPlaces(
+        calculatePercentOfProblemsThatSatisfyStageDistribution(
+          groupOfProblemsToAnalyze
+        ),
+        2
+      )
     );
-    objectOfTimeSeries.percentOfProblemsThatSatisfyStageDistribution.push(
-      roundingUpToNDecimalPlaces(calculatePercentOfProblemsThatSatisfyStageDistribution(
-        groupOfProblemsToAnalyze), 2)
+    arrOfTimeSeries[3].push(
+      roundingUpToNDecimalPlaces(
+        calculatePercentOfReturnsWithHoneIn(groupOfProblemsToAnalyze),
+        2
+      )
     );
-    objectOfTimeSeries.percentOfOneReturnProblemsFromTotalReturnProblems.push(
-      roundingUpToNDecimalPlaces(calculatePercentOfOneReturnProblemsFromTRP(groupOfProblemsToAnalyze), 2)
+    arrOfTimeSeries[4].push(
+      roundingUpToNDecimalPlaces(
+        calculateAverageTT(groupOfProblemsToAnalyze),
+        2
+      )
     );
-    objectOfTimeSeries.percentOfReturnsWithHoneInProperty.push(roundingUpToNDecimalPlaces(
-      calculatePercentOfReturnsWithHoneIn(groupOfProblemsToAnalyze), 2)
+    arrOfTimeSeries[5].push(
+      roundingUpToNDecimalPlaces(
+        calculateAverageTries(groupOfProblemsToAnalyze),
+        2
+      )
     );
   }
 
-  return objectOfTimeSeries;
+  return arrOfTimeSeries;
 };
-export {returnTimeSeriesOfMetrics};
+export { returnTimeSeriesOfMetrics };

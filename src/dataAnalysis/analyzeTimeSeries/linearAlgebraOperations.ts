@@ -11,8 +11,6 @@ Definition of standard matrix => non empty 2d array (i.e. must be rectangular, a
 and is not particularly useful in data analysis or linear algebra 
  */
 
-import {isDataType} from "../isDataType"; 
-
 const createMatrixOfRegressors = function(depVarTimeSeriesLength : number) : Array<number[]> {
   let regMatrix = [];
   for (let ob = 0; ob < depVarTimeSeriesLength; ++ob) {
@@ -27,51 +25,6 @@ const roundingUpToNDecimalPlaces = function (number : number, n : number) : numb
   let fixDecimalPlaces = number.toFixed(n);
   return Number(fixDecimalPlaces);
 }/* function is NOT general (no input checks, e.g. n must be an integer) */
-
-const isItANonEmptyRectangular2dArrayOfNumbers = function(arr : any) : boolean {
-  /* a function to check whether an input is a non-empty 2d rectangular arr of numbers (i.e. standard matrix) => returns true or false */
-  let arrIsAnArray = isDataType(arr, "array");
-  let lengthOfArr = arr.length;
-  if (arrIsAnArray === false || lengthOfArr === 0) {
-    return false;
-  }
-  let lengthOfPreviousRow = arr[0].length;
-  for (let rowIndex = 0; rowIndex < lengthOfArr; ++rowIndex) {
-    let currentRow = arr[rowIndex];
-    let currentRowIsAnArray = isDataType(currentRow, "array");
-    let lengthOfCurrentRow = currentRow.length;
-    if (
-      currentRowIsAnArray === false ||
-      lengthOfCurrentRow === 0 ||
-      lengthOfCurrentRow !== lengthOfPreviousRow
-    ) {
-      return false;
-    }
-    for (let colIndex = 0; colIndex < lengthOfCurrentRow; ++colIndex) {
-      let currentElement = currentRow[colIndex];
-      if (isDataType(currentElement, "number") === false) {
-        return false;
-      }
-    }
-    lengthOfPreviousRow = lengthOfCurrentRow;
-  }
-  return true;
-};
-
-const isItA1dArrayOfNumbers = function(arr : any) : boolean {
-  /* to check whether an input is a non-empty 1d array of numbers => returns true/false */
-  let arrLength = arr.length;
-  if (isDataType(arr, "array") === false || arrLength === 0) {
-    return false;
-  }
-  for (let index = 0; index < arrLength; ++index) {
-    let element = arr[index];
-    if (isDataType(element, "number") === false) {
-      return false;
-    }
-  }
-  return true;
-};
 
 const transposeMatrix = function(matrix : Array<any[]>) : Array<any[]> {
   let totalRows = matrix.length;

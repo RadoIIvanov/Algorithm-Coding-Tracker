@@ -4,6 +4,18 @@ import {
   shapeOfCodingDetailsForAStageInAProblem,
   shapeOfObjectForReturnBackVisitsOfAStage
 } from "../../dataStructureInterfaces";
+import { problemDifficulty } from "../../options";
+
+const AsToCdWhenCdUnknown = function (percentAcceptedSubmissions, chosenDifficultyLevel : string) : boolean {
+  if (chosenDifficultyLevel === "easy" && percentAcceptedSubmissions >= 50) {
+    return true;
+  } else if (chosenDifficultyLevel === "medium" && percentAcceptedSubmissions >= 30) {
+    return true;
+  } else if (chosenDifficultyLevel === "hard" && percentAcceptedSubmissions < 30) {
+    return true;
+  }
+  return false;
+}
 
 const stageTTGreaterThan = function(
   arrOfStages: shapeOfCodingDetailsForAStageInAProblem[],
@@ -47,11 +59,38 @@ const returnToGIGreaterThan = function(
   return reqIsMet;
 };
 
+const boolForChosenDifficultyMandL = function (problem : shapeOfTheCodingData, chosenDifficulty: string, chosenDifficultyLevel : string) : boolean {
+  if (chosenDifficulty === "classifiedDifficulty") {
+    if (problem.classifiedDifficulty === chosenDifficultyLevel) {
+      return true;
+    } else if (problem.classifiedDifficulty === "unknown" && problem.percentAcceptedSubmissions !== "unknown" && AsToCdWhenCdUnknown (problem.percentAcceptedSubmissions, chosenDifficultyLevel)) {
+      return true;
+    }
+  } else {
+    if (problem.percentAcceptedSubmissions !== "unknown") { //// chosenDifficultyLevel needs to be mapped at input if AS is chosen as measure
+      if (chosenDifficultyLevel === "easy" && problem.percentAcceptedSubmissions >= 50) {
+        return true;
+      } else if (chosenDifficultyLevel === "medium" && problem.percentAcceptedSubmissions >= 30 && problem.percentAcceptedSubmissions < 50) {
+        return true;
+      } else if (chosenDifficultyLevel === "hard" && problem.percentAcceptedSubmissions < 30) {
+        return true
+      }
+    } else {
+      if (problem.classifiedDifficulty === chosenDifficultyLevel) {
+        return true;
+      }
+  }}
+  return false;
+}  
+
+
 const checkIfCleanUpRequirementsAreMet = function(
-  problem,
+  problem : shapeOfTheCodingData,
+  chosenDifficulty : string,
+  chosenDifficultyLevel : string,
   totalTimeReq: number = 600,
   stageTimeReq: number = 60,
-  returnToGITimeReq: number = 60
+  returnToGITimeReq: number = 60,
 ): boolean {
   return (
     problem.totalTime > totalTimeReq &&
@@ -59,133 +98,64 @@ const checkIfCleanUpRequirementsAreMet = function(
     returnToGIGreaterThan(
       problem.codingProcessDetails[2].returnBackVisits,
       returnToGITimeReq
-    )
+    ) && boolForChosenDifficultyMandL(problem, chosenDifficulty, chosenDifficultyLevel)
   );
 };
 
 const cleanUpData = function(
-  file: outerShapeOfTheCodingFile
+  arrOfProblems: shapeOfTheCodingData[],
+  chosenDifficulty: string,
+  chosenDifficultyLevel : string
 ): shapeOfTheCodingData[] {
-  let arrOfProblems = file.data;
   let totalProblems = arrOfProblems.length;
   let arrOfProblemsThatMeetCriteria: shapeOfTheCodingData[] = [];
 
   for (let i = 0; i < totalProblems; ++i) {
     let currentProblem = arrOfProblems[i];
-    if (checkIfCleanUpRequirementsAreMet(currentProblem)) {
+    if (checkIfCleanUpRequirementsAreMet(currentProblem, chosenDifficulty, chosenDifficultyLevel)) {
       arrOfProblemsThatMeetCriteria.push(currentProblem);
     }
   }
   return arrOfProblemsThatMeetCriteria;
 };
 
-const splitDataAccordingToCDMeasure = function(
-  data: shapeOfTheCodingData[]
-): Array<Array<shapeOfTheCodingData>> {
-  let totalNumberOfProblems = data.length;
-  let splitData = [[], [], []]; //// at index 0 = Easy Problems, index 1 = Medium, index 2 = Hard
-
-  for (let i = 0; i < totalNumberOfProblems; ++i) {
-    let currentProblem = data[i];
-
-    if (currentProblem.classifiedDifficulty === "Easy") {
-      splitData[0].push(currentProblem);
-      continue;
-    } else if (currentProblem.classifiedDifficulty === "Medium") {
-      splitData[1].push(currentProblem);
-      continue;
-    } else if (currentProblem.classifiedDifficulty === "Hard") {
-      splitData[2].push(currentProblem);
-      continue;
-    }
-
-    if (currentProblem.percentAcceptedSubmissions >= 50) {
-      splitData[0].push(currentProblem);
-    } else if (currentProblem.percentAcceptedSubmissions >= 30) {
-      splitData[1].push(currentProblem);
-    } else if (currentProblem.percentAcceptedSubmissions < 30) {
-      splitData[2].push(currentProblem);
-    }
-  }
-
-  return splitData;
-};
-
-const splitDataAccordingToASMeasure = function(
-  data: shapeOfTheCodingData[]
-): Array<Array<shapeOfTheCodingData>> {
-  let totalNumberOfProblems = data.length;
-  let splitData = [[], [], []];
-
-  for (let i = 0; i < totalNumberOfProblems; ++i) {
-    let currentProblem = data[i];
-
-    if (currentProblem.percentAcceptedSubmissions >= 50) {
-      splitData[0].push(currentProblem);
-      continue;
-    } else if (currentProblem.percentAcceptedSubmissions >= 30) {
-      splitData[1].push(currentProblem);
-      continue;
-    } else if (currentProblem.percentAcceptedSubmissions < 30) {
-      splitData[2].push(currentProblem);
-      continue;
-    }
-
-    if (currentProblem.classifiedDifficulty === "Easy") {
-      splitData[0].push(currentProblem);
-    } else if (currentProblem.classifiedDifficulty === "Medium") {
-      splitData[1].push(currentProblem);
-    } else if (currentProblem.classifiedDifficulty === "Hard") {
-      splitData[2].push(currentProblem);
-    }
-  }
-
-  return splitData;
-};
-
 const splitDataInSequentialGroups = function(
-  data: Array<Array<shapeOfTheCodingData>>,
+  data: shapeOfTheCodingData[],
   sizeOfGroups: number
-): Array<Array<Array<shapeOfTheCodingData>>> {
-  let splitData = [];
-  for (let i = 0; i < data.length; ++i) {
-    let totalProblemsThatFitIntoGroups =
-      data[i].length - (data[i].length % sizeOfGroups);
-    if (totalProblemsThatFitIntoGroups / sizeOfGroups < 2) {
-      splitData[i] = [[]];
-      continue;
-    }
-    splitData[i] = [];
-    let group = [];
-    for (let j = 0; j < totalProblemsThatFitIntoGroups; ++j) {
-      group.push(data[i][j]);
-      if (group.length === sizeOfGroups) {
-        splitData[i].push(group);
-        group = [];
-      }
+): Array<shapeOfTheCodingData[]> {
+  let splitData : Array<shapeOfTheCodingData[]> = [];
+  let totalProblems = data.length;
+  let totalProblemsThatFitIntoGroups = totalProblems - (totalProblems % sizeOfGroups);
+    
+  if ( (totalProblemsThatFitIntoGroups / sizeOfGroups) < 2) {
+    return splitData
+  }
+  let group = [];
+  for (let i = 0; i < totalProblemsThatFitIntoGroups; ++i) {
+    let problem = data[i];
+    group.push(problem);
+    if (group.length === sizeOfGroups) {
+      splitData.push(group);
+      group = [];
     }
   }
   return splitData;
 };
 
 const returnCleanAndSplitData = function(
-  file: outerShapeOfTheCodingFile,
+  data: shapeOfTheCodingData[],
   chosenDifficulty: string,
+  chosenDifficultyLevel: string,
   sizeOfGroups: number
-): Array<Array<Array<shapeOfTheCodingData>>> {
-  let cleanData = cleanUpData(file);
-  let splitDataByDM;
-  if (chosenDifficulty === "classifiedDifficulty") {
-    splitDataByDM = splitDataAccordingToCDMeasure(cleanData);
-  } else if (chosenDifficulty === "percentAcceptedSubmissions") {
-    splitDataByDM = splitDataAccordingToASMeasure(cleanData);
-  }
+): Array<Array<shapeOfTheCodingData>> {
+  let cleanData = cleanUpData(data, chosenDifficulty, chosenDifficultyLevel);
   let splitFurtherInGroups = splitDataInSequentialGroups(
-    splitDataByDM,
+    cleanData,
     sizeOfGroups
   );
   return splitFurtherInGroups;
 };
 
 export {cleanUpData};
+export {splitDataInSequentialGroups};
 export { returnCleanAndSplitData };
