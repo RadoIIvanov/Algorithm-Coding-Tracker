@@ -19,7 +19,7 @@ export function validateNameInputInShowBox(str: string | undefined) {
     return "Please don't leave the box empty";
   }
 
-  let regexForMultipleSpaceCharactersBetweenNonSpaceCharacters = /\S\s\s+?\S/;
+  let regexForMultipleSpaceCharactersBetweenNonSpaceCharacters = /\S\s\s+\S/;
   if (regexForMultipleSpaceCharactersBetweenNonSpaceCharacters.test(str)) {
     return "Please trim the spaces between words";
   }
@@ -43,7 +43,7 @@ export function validatePercentAcceptedSubmissionsInputInShowBox(
   if (matchingResults && matchingResults.length > 1) {
     return "More than 1 decimal point is not allowed";
   }
-  let regexForSpaceCharactersBetweenNumberCharacters = /[0-9.]\s+?[0-9]/;
+  let regexForSpaceCharactersBetweenNumberCharacters = /[0-9.]\s+[0-9]/;
   if (regexForSpaceCharactersBetweenNumberCharacters.test(percent)) {
     return "Please trim the spaces between digits";
   }

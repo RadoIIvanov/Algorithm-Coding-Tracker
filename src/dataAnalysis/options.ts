@@ -7,7 +7,7 @@ let benchmarkArr = [
     0.9, /// consistency
     0.8, /// hone in
     [25 * 60, 35 * 60, 45 * 60], /// eff
-    0.5, /// effec
+    0.75, /// effec
     0.05, /// persistence
 ];
 

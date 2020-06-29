@@ -3,7 +3,7 @@ import { returnTimeSeriesController } from "./produceTimeSeries/returnTimeSeries
 import { returnTimeSeriesForPercentOfIncompletes } from "./produceTimeSeries/otherSubmodulesThatProduceTimeSeries/returnTimeSeriesForPercentOfIncompletes";
 import { getResultsForIndividualMeasures } from "./getIndividualResultsForATimeSeries";
 import { benchmarkArr } from "./options";
-import { objofResultsForAnObjective } from "./getIndividualResultsForATimeSeries";
+import { objofResultsForAnObjective } from "../dataStructureInterfaces";
 import { outerShapeOfTheCodingFile } from "../dataStructureInterfaces";
 
 /* directionOfSuccess is boolean - true for positive and false for negative */

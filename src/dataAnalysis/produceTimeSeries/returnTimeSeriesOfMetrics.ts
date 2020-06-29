@@ -18,7 +18,7 @@ const calculateAverageTT = function(
   return total / totalNumberOfProblems;
 };
 
-const calculateAverageTries = function(
+const calculatePofProblemsCInOneTry = function(
   groupOfProblems: shapeOfTheCodingData[]
 ): number {
   let total = 0;
@@ -26,7 +26,9 @@ const calculateAverageTries = function(
 
   for (let i = 0; i < totalNumberOfProblems; ++i) {
     let currentProblem = groupOfProblems[i];
-    total += currentProblem.numberOfTries;
+    if (currentProblem.numberOfTries === 1) {
+      total = total + 1;
+    }
   }
   return total / totalNumberOfProblems;
 };
@@ -153,7 +155,7 @@ const returnTimeSeriesOfMetrics = function(
     );
     arrOfTimeSeries[5].push(
       roundingUpToNDecimalPlaces(
-        calculateAverageTries(groupOfProblemsToAnalyze),
+        calculatePofProblemsCInOneTry(groupOfProblemsToAnalyze),
         2
       )
     );

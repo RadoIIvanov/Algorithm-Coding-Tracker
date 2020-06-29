@@ -4,7 +4,7 @@
 import { returnAllTimeSeriesResults } from "./assembleAllTimeSeriesResults";
 import { generateDummyData } from "./generateData/generateDummyData";
 
-const dummyData = generateDummyData(10000);
+const dummyData = generateDummyData(1000);
 const timeSeriesForEachDifficulty = returnAllTimeSeriesResults(
   dummyData,
   "classifiedDifficulty",

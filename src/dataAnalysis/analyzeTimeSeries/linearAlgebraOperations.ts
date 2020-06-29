@@ -1,30 +1,16 @@
-/* file to provide needed functionality to determine basic trends in the data, most of the functions take a timeseries of observations as inputs */
-
-/* Some background
-Data is typically represented in matrix form (2d array), where each row/subarray consists of realizations of all random variables
-(i.e. row 1 = all the data for the first observation) and each col consists of all the realizations for a particular random variable
-in this particular case => col 1 = data for depVar(i.e. one of the time series), col 2 = unity vector(reg 1), col 3 = time vector (reg 2)
-unity vector is included for some nice properties (i.e. 1. making sum of forecast errors = 0, 2. easier intuitive understanding of betaX (i.e. through PRT
-regress demeaned y on demeaned x, making xy and xx essentially covar and var respectively)
-Relevant Definition
-Definition of standard matrix => non empty 2d array (i.e. must be rectangular, all rows must have the same amount of elements), else the matrix is ragged/jagged/irregular
-and is not particularly useful in data analysis or linear algebra 
- */
-
 const createMatrixOfRegressors = function(depVarTimeSeriesLength : number) : Array<number[]> {
   let regMatrix = [];
   for (let ob = 0; ob < depVarTimeSeriesLength; ++ob) {
-    /* col 1 = data for depVar(i.e. one of the time series), col 2 = unity vector, col 3 = time vector */
     let observationVector = [1, ob + 1];
     regMatrix[ob] = observationVector;
   }
   return regMatrix;
-}; /* function is NOT general => filling function specific to this context - done */
+}; 
 
-const roundingUpToNDecimalPlaces = function (number : number, n : number) : number { /// n must be an integer
+const roundingUpToNDecimalPlaces = function (number : number, n : number) : number { 
   let fixDecimalPlaces = number.toFixed(n);
   return Number(fixDecimalPlaces);
-}/* function is NOT general (no input checks, e.g. n must be an integer) */
+}
 
 const transposeMatrix = function(matrix : Array<any[]>) : Array<any[]> {
   let totalRows = matrix.length;
@@ -168,7 +154,7 @@ const calcDeterminantOfMatrix = function(
   return determinantValue;
 }; /* general function for a non-empty 2d (square) array of numbers */
 
-const getCofactorMatrixNoInputCheck = function(matrix : Array<number[]>) : Array<number[]> {
+const getCofactorMatrix = function(matrix : Array<number[]>) : Array<number[]> {
   let totalRows = matrix.length;
   let cofactorMatrix = [];
   for (let rowIndex = 0; rowIndex < totalRows; ++rowIndex) {
@@ -191,12 +177,12 @@ const getCofactorMatrixNoInputCheck = function(matrix : Array<number[]>) : Array
   return cofactorMatrix;
 };
 
-const genInverseOfMatrixNoInputCheck = function(matrix : Array<number[]>, determinantValue : number) : Array<number[]> {
+const genInverseOfMatrix = function(matrix : Array<number[]>, determinantValue : number) : Array<number[]> {
   if (matrix.length === 1) {
     return calcProductMatrixWithAScalar([[1]], determinantValue);
   }
   let transposedCofactorMatrix = transposeMatrix(
-    getCofactorMatrixNoInputCheck(matrix)
+    getCofactorMatrix(matrix)
   ); /* this is the adjugate */
   return calcProductMatrixWithAScalar(
     transposedCofactorMatrix,
@@ -218,7 +204,7 @@ const calcInterceptAndSlope = function(regMatrix : Array<number[]> , depVarVecto
     varCovarRegMatrix
   );
 
-  let inverse = genInverseOfMatrixNoInputCheck(varCovarRegMatrix, determinantOfVarCovarMatrix);
+  let inverse = genInverseOfMatrix(varCovarRegMatrix, determinantOfVarCovarMatrix);
   let coefficients = calcMatrixProductWithAVector(inverse, covarVectorRegsAndDepVar)
   let roundedCoefficients = roundCoefficients(coefficients);
   return roundedCoefficients;

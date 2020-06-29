@@ -51,16 +51,19 @@ const returnRandomNumberGeneratorFromNormal = function(
 
 const createNewProblem = function(): shapeOfTheCodingData {
   let newProblem: shapeOfTheCodingData = {};
-  newProblem.codingProcessDetails = [];
-  newProblem.totalTime = 0;
 
   let rollForStatus = Math.random();
   if (rollForStatus > 0.1) {
     newProblem.status = "Complete";
   } else {
     newProblem.status = "Incomplete";
+    let rollForTriesIncomplete = Math.random();
+    newProblem.numberOfTries = Math.round(rollForTriesIncomplete * 10);
     return newProblem;
   }
+  newProblem.codingProcessDetails = [];
+  newProblem.totalTime = 0;
+
   let rollForNumberOfTries = Math.random();
   newProblem.numberOfTries = Math.round(rollForNumberOfTries * 10);
   let problemDifficulty = ["easy", "medium", "hard", "unknown"];

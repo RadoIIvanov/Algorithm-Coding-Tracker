@@ -26,6 +26,6 @@ creates as little data as possible (i.e. only sufficient to test the produceTime
 make sure slope of whole line is not equal to 0 (i.e. to avoid NaN cases from division in 2 and other cases specific to the use of boolean/number conversions in the algorithm)  
 
 ## Other comments
-1. number of problems = 1 point in the time series, 2. objectives, 3. benchmarks are chosen arbitrarily (i.e. superficial judgement)
+1. number of problems that = 1 point in the time series, 2. objectives and 3. benchmarks are all chosen arbitrarily (i.e. superficial judgement)
 In the long run and users' experience level (i.e. higher level => more flexible, trust choices) those things can be made a bit flexible if needed (i.e. similar to infoView interface, load data, let the user choose how to build the time series
 himself (depending on his needs)) 

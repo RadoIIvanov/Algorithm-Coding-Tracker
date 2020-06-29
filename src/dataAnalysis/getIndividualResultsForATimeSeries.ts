@@ -9,7 +9,8 @@ const returnTrueifImprove = function (
   slopeOne: number,
   slopeTwo: number,
   directionOfSuccess: boolean
-): boolean {
+): boolean 
+{
   return (
     ((slopeTwo !== undefined &&
       slopeTwo / slopeOne > 1 &&
@@ -42,7 +43,8 @@ const getResultsForIndividualMeasures = function (
     timeSeries
   );
 
-  if (timeSeriesTotalPoints > whenToEvaluateBothLongTermVsRecentPerformance) {
+  if (timeSeriesTotalPoints > whenToEvaluateBothLongTermVsRecentPerformance) 
+  {
     let matrixOfRegressorsForRecentLine = createMatrixOfRegressors(
       recentPerformance
     );
@@ -60,7 +62,8 @@ const getResultsForIndividualMeasures = function (
     directionOfSuccess
   );
 
-  individualResults = {
+  individualResults = 
+  {
     interceptAndSlopeData: calcInterceptsAndSlopes,
     timeSeriesPoints: timeSeries,
     benchmark: benchmark,

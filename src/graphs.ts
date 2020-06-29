@@ -12,3 +12,4 @@ const graphicFn = function (
   /* the graphFn is general (i.e. receives data for an objective)
   1. intercepts(whole line only if n = 3, else whole + last 3n), 2. slopes(whole line only if n = 3, else whole + last 3n), 3. time series (points), 4. benchmark level for the benchmark line.
   */
+
