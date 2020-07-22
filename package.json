@@ -18,7 +18,8 @@
     "url": "https://github.com/RadoIIvanov/Algorithm-Coding-Tracker/issues"
   },
   "activationEvents": [
-    "onCommand:extension.algocodingtracker.initiateTimer"
+    "onCommand:extension.algocodingtracker.initiateTimer",
+    "onCommand:extension.algocodingtracker.results"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -30,6 +31,10 @@
       {
         "command": "extension.algocodingtracker.stopTimer",
         "title": "algocodingtracker - Stop Timer"
+      },
+      {
+        "command": "extension.algocodingtracker.results",
+        "title": "algocodingtracker - Results"
       }
     ]
   },

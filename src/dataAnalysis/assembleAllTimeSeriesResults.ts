@@ -6,7 +6,7 @@ import { benchmarkArr } from "./options";
 import { objofResultsForAnObjective } from "../dataStructureInterfaces";
 import { outerShapeOfTheCodingFile } from "../dataStructureInterfaces";
 
-/* directionOfSuccess is boolean - true for positive and false for negative */
+/// need to use exceptions and throw - data file writable by anyone
 const returnAllTimeSeriesResults = function (
   file: outerShapeOfTheCodingFile,
   difficultyMeasure: string,

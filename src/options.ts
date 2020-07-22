@@ -32,4 +32,6 @@ stageDescriptions = [ /// this should be revised when basicos has covered it
   "Implement PC, Test, And Fix any Implementation Bugs",
 ];
 
+/// stage and position affect agility and consistency measure (also dummy data stuff), if too many <=> shortcuts?
+
 export { platforms, problemDifficulty, stageDescriptions };

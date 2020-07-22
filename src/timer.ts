@@ -698,7 +698,7 @@ export class Timer {
     }
 
     context.subscriptions.forEach((element, index) => {
-      if (index > 1) {
+      if (index > 2) {
         element.dispose();
       }
     });

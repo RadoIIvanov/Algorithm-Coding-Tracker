@@ -1,0 +1,52 @@
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="test1.css">
+</head>
+
+
+<body>
+    <div id='title'>Pass Arguments</div>
+    <form>
+        <div id='dM'>
+            <label>Difficulty Measures</label>
+            <button type='button'>CD</button>
+            <button type='button'>AS</button>
+        </div>
+
+        <div id='dL'>
+            <label>Difficulty Levels</label>
+            <button type='button'>Easy</button>
+            <button type='button'>Medium</button>
+            <button type='button'>Hard</button>
+        </div>
+
+        <div id='sofG'>
+            <label>Number Of Problems</label>
+            <input type='text' minLength='1' maxLength='2'>
+        </div>
+        <button id='submit' type='submit'>Perform Analysis</button>
+    </form>
+    <p class='titleN'>Notes</p>
+    <div id='notes'>
+        <div id='dMNotes'>
+            <p>* classified difficulty is correlated with total time</p>
+            <p>* % accepted submissions is correlated with # of returns</p>
+        </div>
+        <div id='dLNotes'>
+            <p>Conversion if Unavailable</p>
+            <p>* easy &gt50%</p>
+            <p>* 50%&gt= medium &gt=30%</p>
+            <p>* hard &lt30%</p>
+        </div>
+        <div id='sofGNotes'>
+            <p>* the # of problems from the chosen difficulty level that will represent 1 unit of time in the time series</p>
+            <p>* we are controlling for DL because it is highly correlated with all performance measures </p>
+
+        </div>
+        
+    </div> 
+    <script src='willBeModularized.js'></script>
+</body>
+
+</html>

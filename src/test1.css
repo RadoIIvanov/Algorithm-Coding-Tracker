@@ -1,0 +1,275 @@
+html {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    font-size: 16px;
+    font-family: sans-serif;
+}
+
+body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    color: black;
+    background-color: white;
+}
+
+/* first view */
+#title {
+    height: 5%;
+    text-align: center;
+    font-style: italic;
+    font-weight: bold;
+    font-size: 24px;
+    font-family: inherit;
+}
+
+form {
+    position: absolute;
+    width: 100%;
+    height: 45%;
+    display: table;
+    margin-block-end: 0;
+}
+
+form>#dM,
+form>#dL,
+form>#sofG {
+    text-align: center;
+    display: table-cell;
+    vertical-align: middle;
+    width: 33.33%;
+}
+
+#dM>label,
+#dL>label,
+#sofG>label {
+    display: block;
+}
+
+#dM>button,
+#dL>button {
+    display: inline-block;
+}
+
+#sofG>input {
+    text-align: center;
+    width: 30px
+}
+
+form>#submit {
+    position: absolute;
+    right: 20px;
+    bottom: 10px;
+}
+
+.titleN {
+    font-style: italic;
+    font-weight: bold;
+    font-size: 24px;
+    font-family: inherit;
+    margin: 0;
+    text-align: center;
+    position: absolute;
+    top: 50%;
+    display: block;
+    width: 100%;
+    height: 5%;
+}
+
+#notes {
+    position: absolute;
+    top: 55%;
+    display: table;
+    margin-block-end: 0;
+    width: 100%;
+    height: 45%;
+}
+
+#notes>#dMNotes,
+#notes>#dLNotes,
+#notes>#sofGNotes {
+    text-align: center;
+    display: table-cell;
+    width: 33.33%;
+    vertical-align: middle;
+}
+
+body,
+form,
+form>#submit,
+#sofG>input,
+#dM>button,
+#dL>button,
+#dM>label,
+#dL>label,
+#sofG>label,
+form>#dM,
+form>#dL,
+form>#sofG,
+#notes,
+#notes>#dMNotes,
+#notes>#dLNotes,
+#notes>#sofGNotes,
+#dMNotes>p,
+#dLNotes>p,
+#sofGNotes>p {
+    font-size: inherit;
+    font-family: inherit;
+}
+
+form>#dM,
+#notes>#dMNotes {
+    background-color: rgba(45%, 75%, 25%, 50%);
+}
+
+form>#dL,
+#notes>#dLNotes {
+    background-color: rgba(50%, 50%, 0%, 50%);
+}
+
+form>#sofG,
+#notes>#sofGNotes {
+    background-color: rgba(45%, 25%, 75%, 50%);
+}
+
+@media screen and (max-height: 521px) {
+    #title, .titleN {
+        font-size: 16px;
+    }
+}
+
+@media screen and (max-width: 550px) {
+    html {
+        font-size: 10.66px;
+    }
+}
+
+@media screen and (min-height: 800px) {
+    #title, .titleN {
+        font-size: 36px;
+    }
+}
+
+@media screen and (min-width: 850px) {
+    html {
+        font-size: 24px;
+    }
+}
+
+@media screen and (min-height: 1200px) {
+    #title, .titleN {
+        font-size: 54px;
+    }   
+}
+
+
+@media screen and (min-width: 2050px ) {
+    html {
+        font-size: 36px;
+    }
+}
+
+@media screen and (min-height: 1600px) {
+    #title, .titleN {
+        font-size: 81px;
+    }   
+}
+
+
+@media screen and (min-width: 2720px ) {
+    html {
+        font-size: 54px;
+    }
+}
+
+/* 2nd view */
+#cont2v {
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    font-size: 16px;
+}
+
+#cont2v > #invis {
+    visibility: hidden;
+}
+
+#cont2v div {
+    margin-bottom: 5.5%;
+}
+
+#cont2v button {
+    margin-left: 5px;
+}
+#cont2v > #invis {
+    visibility: hidden;
+}
+
+#cont2v div {
+    margin-bottom: 3.5%;
+}
+
+#cont2v > #titles {
+    margin-bottom: 0.5%;
+}
+
+#cont2v > #titles > #invButt {
+    visibility: hidden;
+    margin-left: 2.5%;
+}
+
+#cont2v > #titles > .impV {
+    display: inline-block;
+    width: 10%;
+    margin-left: 3.5%;
+    font-size: 150%;
+    font-style: italic
+}
+
+#cont2v > #titles > .skills {
+    display: inline-block;
+    font-size: 150%;
+    font-style: italic
+}
+
+#cont2v > div > .impV {
+    display: inline-block;
+    width: 2%;
+    margin-left: 7%;
+}
+
+#cont2v > div > .skills {
+    display: inline-block;
+    width: 10%;
+}
+
+#cont2v button {
+    margin-left: 7%;
+}
+
+@media screen and (max-width: 1050px ) {
+    #cont2v div {
+        margin-bottom: 4.5%;
+    }
+}
+
+@media screen and (max-width: 850px ) {
+    #cont2v div {
+        margin-bottom: 5.5%;
+    }
+}
+
+@media screen and (max-width: 650px ) {
+    #cont2v div {
+        margin-bottom: 6.5%;
+    }
+}
+
+/* 3rd view */
+
+canvas {
+    height: 100%;
+    width: 100%;
+}
