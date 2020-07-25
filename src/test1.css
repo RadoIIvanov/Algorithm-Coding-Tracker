@@ -135,7 +135,9 @@ form>#sofG,
 }
 
 @media screen and (max-height: 521px) {
-    #title, .titleN {
+
+    #title,
+    .titleN {
         font-size: 16px;
     }
 }
@@ -147,7 +149,9 @@ form>#sofG,
 }
 
 @media screen and (min-height: 800px) {
-    #title, .titleN {
+
+    #title,
+    .titleN {
         font-size: 36px;
     }
 }
@@ -159,26 +163,30 @@ form>#sofG,
 }
 
 @media screen and (min-height: 1200px) {
-    #title, .titleN {
+
+    #title,
+    .titleN {
         font-size: 54px;
-    }   
+    }
 }
 
 
-@media screen and (min-width: 2050px ) {
+@media screen and (min-width: 2050px) {
     html {
         font-size: 36px;
     }
 }
 
 @media screen and (min-height: 1600px) {
-    #title, .titleN {
+
+    #title,
+    .titleN {
         font-size: 81px;
-    }   
+    }
 }
 
 
-@media screen and (min-width: 2720px ) {
+@media screen and (min-width: 2720px) {
     html {
         font-size: 54px;
     }
@@ -189,21 +197,19 @@ form>#sofG,
     width: 100%;
     height: 100%;
     text-align: center;
-    font-size: 16px;
+    font-size: 24px;
+    background-color: rgba(211, 211, 211);
 }
 
-#cont2v > #invis {
+#cont2v>#invis {
     visibility: hidden;
-}
-
-#cont2v div {
-    margin-bottom: 5.5%;
 }
 
 #cont2v button {
     margin-left: 5px;
 }
-#cont2v > #invis {
+
+#cont2v>#invis {
     visibility: hidden;
 }
 
@@ -211,16 +217,16 @@ form>#sofG,
     margin-bottom: 3.5%;
 }
 
-#cont2v > #titles {
+#cont2v>#titles {
     margin-bottom: 0.5%;
 }
 
-#cont2v > #titles > #invButt {
+#cont2v>#titles>#invButt {
     visibility: hidden;
     margin-left: 2.5%;
 }
 
-#cont2v > #titles > .impV {
+#cont2v>#titles>.impV {
     display: inline-block;
     width: 10%;
     margin-left: 3.5%;
@@ -228,46 +234,367 @@ form>#sofG,
     font-style: italic
 }
 
-#cont2v > #titles > .skills {
+#cont2v>#titles>.skills {
     display: inline-block;
     font-size: 150%;
     font-style: italic
 }
 
-#cont2v > div > .impV {
+#cont2v>div>.impV {
     display: inline-block;
     width: 2%;
     margin-left: 7%;
 }
 
-#cont2v > div > .skills {
+#cont2v>div>.skills {
     display: inline-block;
     width: 10%;
 }
 
 #cont2v button {
     margin-left: 7%;
+    font-size: inherit;
 }
 
-@media screen and (max-width: 1050px ) {
+#cont2v>#notes {
+    font-size: 125%;
+    margin: 0px;
+}
+
+@media screen and (min-aspect-ratio: 26/10) and (min-height: 1500px) {
+    #cont2v {
+        font-size: 60px;
+    }
+    #cont2v div {
+        margin-bottom: 1.0%;
+    }
+    #cont2v > #titles {
+        margin-bottom: 0.14%;
+    }
+}
+
+@media screen and (min-aspect-ratio: 26/10) and (max-height: 1200px) {
+    #cont2v {
+        font-size: 49px;
+    }
+    #cont2v div {
+        margin-bottom: 1.0%;
+    }
+    #cont2v > #titles {
+        margin-bottom: 0.14%;
+    }
+}
+
+@media screen and (min-aspect-ratio: 26/10) and (max-height: 900px) {
+    #cont2v {
+        font-size: 37px;
+    }
+    #cont2v div {
+        margin-bottom: 1.0%;
+    }
+    #cont2v > #titles {
+        margin-bottom: 0.14%;
+    }
+}
+
+@media screen and (min-aspect-ratio: 26/10) and (max-height: 600px) {
+    #cont2v {
+        font-size: 25px;
+    }
+    #cont2v div {
+        margin-bottom: 1.0%;
+    }
+    #cont2v > #titles {
+        margin-bottom: 0.14%;
+    }
+}
+
+@media screen and (min-aspect-ratio: 26/10) and (max-height: 400px) {
+    #cont2v {
+        font-size: 16.3px;
+    }
+    #cont2v div {
+        margin-bottom: 1.0%;
+    }
+    #cont2v > #titles {
+        margin-bottom: 0.14%;
+    }
+}
+/*  */
+
+@media screen and (max-aspect-ratio: 26/10) and (min-height: 1500px) {
+    #cont2v {
+        font-size: 54px;
+    }
+    #cont2v div {
+        margin-bottom: 1.5%;
+    }
+    #cont2v > #titles {
+        margin-bottom: 0.22%;
+    }
+}
+
+@media screen and (max-aspect-ratio: 26/10) and (max-height: 1200px) {
+    #cont2v {
+        font-size: 43px;
+    }
+    #cont2v div {
+        margin-bottom: 1.5%;
+    }
+    #cont2v > #titles {
+        margin-bottom: 0.22%;
+    }
+}
+
+@media screen and (max-aspect-ratio: 26/10) and (max-height: 900px) {
+    #cont2v {
+        font-size: 32px;
+    }
+    #cont2v div {
+        margin-bottom: 1.5%;
+    }
+    #cont2v > #titles {
+        margin-bottom: 0.22%;
+    }
+}
+
+@media screen and (max-aspect-ratio: 26/10) and (max-height: 600px) {
+    #cont2v {
+        font-size: 22px;
+    }
+    #cont2v div {
+        margin-bottom: 1.5%;
+    }
+    #cont2v > #titles {
+        margin-bottom: 0.22%;
+    }
+}
+
+@media screen and (max-aspect-ratio: 26/10) and (max-height: 400px) {
+    #cont2v {
+        font-size: 14px;
+    }
+    #cont2v div {
+        margin-bottom: 1.5%;
+    }
+    #cont2v > #titles {
+        margin-bottom: 0.22%;
+    }
+}
+
+/*  */
+@media screen and (max-aspect-ratio: 23/10) and (min-height: 1500px) {
+    #cont2v {
+        font-size: 37px;
+    }
+    #cont2v div {
+        margin-bottom: 2.5%;
+    }
+    #cont2v > #titles {
+        margin-bottom: 0.36%;
+    }
+}
+
+@media screen and (max-aspect-ratio: 23/10) and (max-height: 1200px) {
+    #cont2v {
+        font-size: 30px;
+    }
+    #cont2v div {
+        margin-bottom: 2.5%;
+    }
+    #cont2v > #titles {
+        margin-bottom: 0.36%;
+    }
+}
+
+@media screen and (max-aspect-ratio: 23/10) and (max-height: 900px) {
+    #cont2v {
+        font-size: 22px;
+    }
+    #cont2v div {
+        margin-bottom: 2.5%;
+    }
+    #cont2v > #titles {
+        margin-bottom: 0.36%;
+    }
+}
+
+@media screen and (max-aspect-ratio: 23/10) and (max-height: 600px) {
+    #cont2v {
+        font-size: 15px;
+    }
+    #cont2v div {
+        margin-bottom: 2.5%;
+    }
+    #cont2v > #titles {
+        margin-bottom: 0.36%;
+    }
+}
+
+@media screen and (max-aspect-ratio: 23/10) and (max-height: 400px) {
+    #cont2v {
+        font-size: 10px;
+    }
+    #cont2v div {
+        margin-bottom: 2.5%;
+    }
+    #cont2v > #titles {
+        margin-bottom: 0.36%;
+    }
+}
+
+/* main - only height/font  */
+@media screen and (min-height: 1500px) {
+    #cont2v {
+        font-size: 34px;
+    }
+}
+
+@media screen and (min-height: 1200px) {
+    #cont2v {
+        font-size: 27px;
+    }
+}
+
+@media screen and (max-height: 750px) {
+    #cont2v {
+        font-size: 17px;
+    }
+}
+
+@media screen and (max-height: 500px) {
+    #cont2v {
+        font-size: 11px;
+    }
+}
+/*  */
+@media screen and (max-aspect-ratio: 17/10) and (min-height: 1500px) {
+    #cont2v {
+        font-size: 30px;
+    }
     #cont2v div {
         margin-bottom: 4.5%;
     }
-}
-
-@media screen and (max-width: 850px ) {
-    #cont2v div {
-        margin-bottom: 5.5%;
+    #cont2v > #titles {
+        margin-bottom: 0.64%;
     }
 }
 
-@media screen and (max-width: 650px ) {
+@media screen and (max-aspect-ratio: 17/10) and (max-height: 1200px) {
+    #cont2v {
+        font-size: 23px;
+    }
     #cont2v div {
-        margin-bottom: 6.5%;
+        margin-bottom: 4.5%;
+    }
+    #cont2v > #titles {
+        margin-bottom: 0.64%;
+    }
+}
+
+@media screen and (max-aspect-ratio: 17/10) and (max-height: 900px) {
+    #cont2v {
+        font-size: 17px;
+    }
+    #cont2v div {
+        margin-bottom: 4.5%;
+    }
+    #cont2v > #titles {
+        margin-bottom: 0.64%;
+    }
+}
+
+@media screen and (max-aspect-ratio: 17/10) and (max-height: 600px) {
+    #cont2v {
+        font-size: 11px;
+    }
+    #cont2v div {
+        margin-bottom: 4.5%;
+    }
+    #cont2v > #titles {
+        margin-bottom: 0.64%;
+    }
+}
+
+@media screen and (max-aspect-ratio: 17/10) and (max-height: 400px) {
+    #cont2v {
+        font-size: 8px;
+    }
+    #cont2v div {
+        margin-bottom: 4.5%;
+    }
+    #cont2v > #titles {
+        margin-bottom: 0.64%;
+    }
+}
+
+/*  */
+
+@media screen and (max-aspect-ratio: 14/10) and (min-height: 1500px) {
+    #cont2v {
+        font-size: 29px;
+    }
+    #cont2v div {
+        margin-bottom: 5.5%;
+    }
+    #cont2v > #titles {
+        margin-bottom: 0.79%;
+    }
+}
+
+@media screen and (max-aspect-ratio: 14/10) and (max-height: 1200px) {
+    #cont2v {
+        font-size: 22px;
+    }
+    #cont2v div {
+        margin-bottom: 5.5%;
+    }
+    #cont2v > #titles {
+        margin-bottom: 0.79%;
+    }
+}
+
+@media screen and (max-aspect-ratio: 14/10) and (max-height: 900px) {
+    #cont2v {
+        font-size: 16px;
+    }
+    #cont2v div {
+        margin-bottom: 5.5%;
+    }
+    #cont2v > #titles {
+        margin-bottom: 0.79%;
+    }
+}
+
+@media screen and (max-aspect-ratio: 14/10) and (max-height: 600px) {
+    #cont2v {
+        font-size: 10.3px;
+    }
+    #cont2v div {
+        margin-bottom: 5.5%;
+    }
+    #cont2v > #titles {
+        margin-bottom: 0.79%;
+    }
+}
+
+@media screen and (max-aspect-ratio: 14/10) and (max-height: 400px) {
+    #cont2v {
+        font-size: 7.5px;
+    }
+    #cont2v div {
+        margin-bottom: 5.5%;
+    }
+    #cont2v > #titles {
+        margin-bottom: 0.79%;
     }
 }
 
 /* 3rd view */
+#div3v {
+    position: absolute;
+    top: 2%;
+}
 
 canvas {
     height: 100%;

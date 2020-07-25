@@ -1,7 +1,7 @@
 # Main Modules
 
 ## analyzeTimeSeries
-*linearAlgebraOperations.ts => typical vector/matrix operations, calculates coefficients of the regression line for a time series 
+*linearAlgebraOperations.ts => typical vector/matrix operations, calculates coefficients of the regression line for a time series. It is not precise (i.e. errors from calculations with decimals). Additionally, the "imprecise" results are rounded before being visually presented to the user (i.e. increasing the error). At some point those need to be improved. 
 
 ## generateData for testing
 Instead of unit and integration tests, simplified form of fuzz testing is used to generate dummy data and test the behavior of the functions/submodules (i.e. although not optimal, it is much easier and quicker when you are dealing with data analysis where the inputs are complex objects (e.g. manual creation is cumbersome, plus I wanted to play with the random generator function) )
@@ -21,8 +21,7 @@ creates as little data as possible (i.e. only sufficient to test the produceTime
 
 ## Comment on evaluation of improvement
 *Conservative approach is taken, here are the basics:
-1. If number of points is low, get slope of whole reg line and compare its sign against the objective (same sign => improved)
-2. If number of points is high, get 2 slopes (whole and recent), only if both of their signs + the sign of objective is the same, and if recent > whole > 1 => improved, else not (i.e it is conservative because it is not satisfied if i.e. recent and objective are the same sign but recent is not strong enough to overturn the sign of the slope of the whole line, or in cases where the 3 are the same sign but recent / whole < 1>)
+"Improvement Evaluation (Tick vs Cross) is conservative - 1. Slope of the whole reg line needs to be in the right direction AND 2. Recent(last 3 points) slope / whole slope > 1"
 make sure slope of whole line is not equal to 0 (i.e. to avoid NaN cases from division in 2 and other cases specific to the use of boolean/number conversions in the algorithm)  
 
 ## Other comments

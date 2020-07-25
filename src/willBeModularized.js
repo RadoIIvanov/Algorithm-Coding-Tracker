@@ -14,7 +14,7 @@ const drawGraph3V = function (userC, data) {
     composure: "% of P with 1 Return from all P with any # of Returns",
     consistency: "% of P where each stage is 10-25% of TT",
     honeIn: "% of Return Cycles shorter than Previous Cycle",
-    efficiency: "Average Total Time per Problem",
+    efficiency: "Average Total Time per Problem (in minutes)",
     effectiveness: "% of P completed in the first attempt",
     persistence: "% of Incompleted Problems",
   };
@@ -216,8 +216,10 @@ const drawGraph3V = function (userC, data) {
   };
 
   cs.beginPath();
+  cs.globalAlpha = 0.4;
   drawXValAndLines(startX, startY, vStep, hStep, lengthOfGraph, marginTandB);
   cs.stroke();
+  cs.globalAlpha = 1;
 
   cs.setLineDash([]);
   cs.beginPath();
@@ -264,22 +266,24 @@ const drawGraph3V = function (userC, data) {
     let com = `${size} regression line, slope ${s}`;
     cs.font = `${canvas.height / 35}px Verdana`;
     let comW = cs.measureText(com).width;
-    let pM = pS + (nOfHSect / 2) * s;
-    let yM = -(((pM - botV) / vIncrement) * vStep);
-    let ratio = (-yS - -yM) / ((nOfHSect / 2) * hStep);
-    cs.translate(0, yS);
-    cs.rotate(Math.atan(ratio));
-    cs.fillText(com, 0, -2);
-    cs.rotate(-Math.atan(ratio));
-    cs.translate(0, -yS);
+    let yPos = size === "partial(last 3 points)"? canvas.height / 35 * 2 : canvas.height / 35;
+    cs.strokeText(com, hStep * nOfHSect - comW, yPos);
+    // let pM = pS + (nOfHSect / 2) * s;
+    // let yM = -(((pM - botV) / vIncrement) * vStep);
+    // let ratio = (-yS - -yM) / ((nOfHSect / 2) * hStep);
+    // cs.translate(0, yS);
+    // cs.rotate(Math.atan(ratio));
+    // cs.fillText(com, 0, -2);
+    // cs.rotate(-Math.atan(ratio));
+    // cs.translate(0, -yS);
   };
-  cs.strokeStyle = "red";
+  cs.strokeStyle = "green";
   plotRegL(intAndSlopArr, vStep, hStep, botV, vIncrement, nOfHSect, "whole");
   cs.stroke();
 
   if (intAndSlopArr.length > 2) {
     cs.beginPath();
-    cs.strokeStyle = "brown";
+    cs.strokeStyle = "red";
     plotRegL(
       intAndSlopArr.slice(2),
       vStep,
@@ -291,7 +295,7 @@ const drawGraph3V = function (userC, data) {
     );
     cs.stroke();
   }
-};
+}; /// for the text of reg lines, a legend will be used (i.e. bot right). Cannot cover all the edges cases when text is rotated along the reg lines (i.e. low intercept and big negative slope...)
 
 const crudDom2V = function (data, arrOfM) {
   let body = document.documentElement.children[1];
@@ -345,12 +349,23 @@ const crudDom2V = function (data, arrOfM) {
     div.appendChild(butt);
     cont.appendChild(div);
   }
+  let notesEv = document.createElement("p");
+  notesEv.setAttribute("id", "notesEv2v");
+  notesEv.innerHTML =
+    "<strong>** (Tick vs Cross) - 1. Slope of the whole reg line needs to be in the right direction AND 2. Recent(last 3 points) slope / whole slope > 1</strong>";
+  let notesCal = document.createElement("p");
+  notesCal.setAttribute("id", "notesCalc2v");
+  notesCal.innerHTML =
+    "<strong>** Calculations are 1. imprecise (i.e. operations with decimals) and 2. rounded. Don't put much value in small slopes/differences</strong>";
+  cont.appendChild(notesEv);
+  cont.appendChild(notesCal);
 };
 
 const crudDom3V = function (userC, data) {
   let body = document.documentElement.children[1];
   removeBotUp(orderTopDown(body, []));
   let div = document.createElement("div");
+  div.setAttribute('id', 'div3v');
   let butt = document.createElement("button");
   butt.innerHTML = `&#8592; Return Back`;
   div.appendChild(butt);
@@ -472,8 +487,9 @@ window.addEventListener(
     inpBox.addEventListener(
       "change",
       (event) => {
-        if (inpBox.value.match(/^[1-9]\d?$/) === null) {
-          inpBox.setCustomValidity("Please, provide a number (1-99)");
+        console.log(inpBox.value);
+        if (inpBox.value.match(/^[1-9]\d?$/) === null || inpBox.value === "1") {
+          inpBox.setCustomValidity("Please, provide a number (2-99)"); 
           event.stopPropagation();
           return;
         }
@@ -498,8 +514,8 @@ window.addEventListener(
           event.stopPropagation();
           return;
         }
-        if (inpBox.value === "") {
-          inpBox.setCustomValidity("Please, provide a number (1-99)");
+        if (inpBox.value.match(/^[1-9]\d?$/) === null || inpBox.value === "1") {
+          inpBox.setCustomValidity("Please, provide a number (2-99)");
           event.stopPropagation();
           return;
         }
