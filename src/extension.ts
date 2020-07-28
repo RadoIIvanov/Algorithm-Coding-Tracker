@@ -87,15 +87,15 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(timerStart);
   context.subscriptions.push(timerStop);
 
-  let results = vscode.commands.registerCommand("extension.algocodingtracker.results", () => {  /*  this part with need refactor and testing */
+  let results = vscode.commands.registerCommand("extension.algocodingtracker.results", () => {  
     let resultsP: vscode.WebviewPanel = vscode.window.createWebviewPanel('resultsId', 'results', vscode.ViewColumn.One, {
       localResourceRoots: [vscode.Uri.file(os.homedir())],
       enableScripts: true,
     });
 
-    let cssVsCId = vscode.Uri.file(path.join(context.extensionPath, 'src', 'test1.css'));
+    let cssVsCId = vscode.Uri.file(path.join(context.extensionPath, 'src', 'cssIFrame.css'));
     let cssWebVId = resultsP.webview.asWebviewUri(cssVsCId);
-    let jsVsCId = vscode.Uri.file(path.join(context.extensionPath, 'src', 'willBeModularized.js'));
+    let jsVsCId = vscode.Uri.file(path.join(context.extensionPath, 'src', 'scriptIFrame.js'));
     let jsWebVId = resultsP.webview.asWebviewUri(jsVsCId);
 
     const genHTMLforView1 = function () {

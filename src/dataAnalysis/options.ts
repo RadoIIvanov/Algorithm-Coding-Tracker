@@ -1,5 +1,5 @@
-let whenToEvaluateBothLongTermVsRecentPerformance: number = 3;
-let recentPerformance: number = 3; /// how many points to take from the end of the whole timeseries to evaluate recent performance in case the whole line is longer the above
+let whenToEvaluateBothLongTermVsRecentPerformance: number = 7;
+let splitF: number = 0.5;
 
 let benchmarkArr = [
     0.75, /// agility
@@ -16,6 +16,6 @@ let benchmarkArr = [
 export {
   benchmarkArr,
   whenToEvaluateBothLongTermVsRecentPerformance,
-  recentPerformance
+  splitF
 };
 

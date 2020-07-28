@@ -6,7 +6,7 @@ The aim of the extension is to alleviate certain issues I was encountering durin
 
 1. It keeps track and records the time you spent on each of the typical stages in the process of solving algorithmic challenges
    a) at the end of a session it asks you for some additional information with regards to the problem and saves the data in a json file (i.e. to be analyzed at a future date)
-2. Simple and lightweight - no dependencies
+2. No dependencies aside from bignuber.js
 
 ## What are the plans for future versions:
 

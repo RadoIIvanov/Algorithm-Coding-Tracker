@@ -20,9 +20,8 @@ creates as little data as possible (i.e. only sufficient to test the produceTime
 *percentOfIncompletes.ts => without cleaning the data, just splitting in sequential groups, => returs a timeseries of % of incompletes
 
 ## Comment on evaluation of improvement
-*Conservative approach is taken, here are the basics:
-"Improvement Evaluation (Tick vs Cross) is conservative - 1. Slope of the whole reg line needs to be in the right direction AND 2. Recent(last 3 points) slope / whole slope > 1"
-make sure slope of whole line is not equal to 0 (i.e. to avoid NaN cases from division in 2 and other cases specific to the use of boolean/number conversions in the algorithm)  
+* if one line => look at slope
+* if two lines(look at half vs other half and compare their mid point)
 
 ## Other comments
 1. number of problems that = 1 point in the time series, 2. objectives and 3. benchmarks are all chosen arbitrarily (i.e. superficial judgement)

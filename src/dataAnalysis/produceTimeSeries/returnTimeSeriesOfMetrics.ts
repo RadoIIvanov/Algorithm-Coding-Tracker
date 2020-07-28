@@ -5,8 +5,22 @@ import {
   shapeOfCodingDetailsForAStageInAProblem,
   shapeOfObjectForReturnBackVisitsOfAStage
 } from "../../dataStructureInterfaces";
+import { group } from "console";
 
-const calculateAverageTT = function(
+/* first fn is auxiliary to cover the case where divisors are 0 without breaking (one output type of main lower level functions + want to avoid allowing NAN returns, later on exceptons) */
+const calcTotalReturns = function (groupOfProblems: shapeOfTheCodingData[]): number {
+  let totalReturns = 0
+  let totalNumberOfProblems = groupOfProblems.length;
+
+  for (let i = 0; i < totalNumberOfProblems; ++i) {
+    let currentProblem = groupOfProblems[i]
+    totalReturns += currentProblem.totalReturns;
+  }
+  return totalReturns;
+}
+
+/*  */
+const calculateAverageTT = function (
   groupOfProblems: shapeOfTheCodingData[]
 ): number {
   let total = 0;
@@ -18,7 +32,7 @@ const calculateAverageTT = function(
   return total / totalNumberOfProblems;
 };
 
-const calculatePofProblemsCInOneTry = function(
+const calculatePofProblemsCInOneTry = function (
   groupOfProblems: shapeOfTheCodingData[]
 ): number {
   let total = 0;
@@ -33,7 +47,7 @@ const calculatePofProblemsCInOneTry = function(
   return total / totalNumberOfProblems;
 };
 
-const calculateReturnsToGIvsTR = function(
+const calculateReturnsToGIvsTR = function (
   groupOfProblems: shapeOfTheCodingData[]
 ): number {
   let totalReturnsToGI = 0;
@@ -48,7 +62,7 @@ const calculateReturnsToGIvsTR = function(
   return totalReturnsToGI / totalReturns;
 };
 
-const calculatePercentOfProblemsThatSatisfyStageDistribution = function(
+const calculatePercentOfProblemsThatSatisfyStageDistribution = function (
   groupOfProblems: shapeOfTheCodingData[]
 ): number {
   let totalProblemsThatSatisfyStageDistribution = 0;
@@ -78,7 +92,7 @@ const calculatePercentOfProblemsThatSatisfyStageDistribution = function(
   return totalProblemsThatSatisfyStageDistribution / totalNumberOfProblems;
 };
 
-const calculatePercentOfOneReturnProblemsFromTRP = function(
+const calculatePercentOfOneReturnProblemsFromTRP = function (
   groupOfProblems: shapeOfTheCodingData[]
 ): number {
   let totalProblemsWithOneReturn = 0;
@@ -97,7 +111,7 @@ const calculatePercentOfOneReturnProblemsFromTRP = function(
   return totalProblemsWithOneReturn / totalReturnProblems;
 };
 
-const calculatePercentOfReturnsWithHoneIn = function(
+const calculatePercentOfReturnsWithHoneIn = function (
   groupOfProblems: shapeOfTheCodingData[]
 ): number {
   let totalReturnsWithHoneIn = 0;
@@ -113,7 +127,7 @@ const calculatePercentOfReturnsWithHoneIn = function(
   return totalReturnsWithHoneIn / totalReturns;
 };
 
-const returnTimeSeriesOfMetrics = function(
+const returnTimeSeriesOfMetrics = function (
   dataForDifficulty: Array<Array<shapeOfTheCodingData>>
 ): Array<number[]> {
   let totalNumberOfGroups = dataForDifficulty.length;
@@ -121,44 +135,67 @@ const returnTimeSeriesOfMetrics = function(
 
   for (let i = 0; i < totalNumberOfGroups; ++i) {
     let groupOfProblemsToAnalyze = dataForDifficulty[i];
-    arrOfTimeSeries[0].push(
-      roundingUpToNDecimalPlaces(
-        calculateReturnsToGIvsTR(groupOfProblemsToAnalyze),
-        2
-      )
-    );
-    arrOfTimeSeries[1].push(
-      roundingUpToNDecimalPlaces(
-        calculatePercentOfOneReturnProblemsFromTRP(groupOfProblemsToAnalyze),
-        2
-      )
-    );
-    arrOfTimeSeries[2].push(
-      roundingUpToNDecimalPlaces(
-        calculatePercentOfProblemsThatSatisfyStageDistribution(
-          groupOfProblemsToAnalyze
-        ),
-        2
-      )
-    );
-    arrOfTimeSeries[3].push(
-      roundingUpToNDecimalPlaces(
-        calculatePercentOfReturnsWithHoneIn(groupOfProblemsToAnalyze),
-        2
-      )
-    );
-    arrOfTimeSeries[4].push(
-      roundingUpToNDecimalPlaces(
-        calculateAverageTT(groupOfProblemsToAnalyze),
-        2
-      )
-    );
-    arrOfTimeSeries[5].push(
-      roundingUpToNDecimalPlaces(
-        calculatePofProblemsCInOneTry(groupOfProblemsToAnalyze),
-        2
-      )
-    );
+
+    let totalR = calcTotalReturns(groupOfProblemsToAnalyze);
+
+    if (totalR === 0) {
+      arrOfTimeSeries[2].push(
+        roundingUpToNDecimalPlaces(
+          calculatePercentOfProblemsThatSatisfyStageDistribution(
+            groupOfProblemsToAnalyze
+          ),
+          2
+        )
+      );
+      arrOfTimeSeries[4].push(
+        roundingUpToNDecimalPlaces(
+          calculateAverageTT(groupOfProblemsToAnalyze),
+          2
+        )
+      );
+      arrOfTimeSeries[5].push(
+        roundingUpToNDecimalPlaces(
+          calculatePofProblemsCInOneTry(groupOfProblemsToAnalyze),
+          2
+        )
+      );
+
+    } else {
+      arrOfTimeSeries[0].push(roundingUpToNDecimalPlaces(calculateReturnsToGIvsTR(groupOfProblemsToAnalyze), 2));
+
+      arrOfTimeSeries[1].push(
+        roundingUpToNDecimalPlaces(
+          calculatePercentOfOneReturnProblemsFromTRP(groupOfProblemsToAnalyze),
+          2
+        )
+      );
+      arrOfTimeSeries[2].push(
+        roundingUpToNDecimalPlaces(
+          calculatePercentOfProblemsThatSatisfyStageDistribution(
+            groupOfProblemsToAnalyze
+          ),
+          2
+        )
+      );
+      arrOfTimeSeries[3].push(
+        roundingUpToNDecimalPlaces(
+          calculatePercentOfReturnsWithHoneIn(groupOfProblemsToAnalyze),
+          2
+        )
+      );
+      arrOfTimeSeries[4].push(
+        roundingUpToNDecimalPlaces(
+          calculateAverageTT(groupOfProblemsToAnalyze),
+          2
+        )
+      );
+      arrOfTimeSeries[5].push(
+        roundingUpToNDecimalPlaces(
+          calculatePofProblemsCInOneTry(groupOfProblemsToAnalyze),
+          2
+        )
+      );
+    }
   }
 
   return arrOfTimeSeries;

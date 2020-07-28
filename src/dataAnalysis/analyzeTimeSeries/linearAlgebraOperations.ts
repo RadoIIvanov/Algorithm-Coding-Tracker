@@ -1,18 +1,25 @@
-const createMatrixOfRegressors = function(depVarTimeSeriesLength : number) : Array<number[]> {
+const BigNumber = require("bignumber.js");
+
+const createMatrixOfRegressors = function (
+  depVarTimeSeriesLength: number
+): Array<number[]> {
   let regMatrix = [];
   for (let ob = 0; ob < depVarTimeSeriesLength; ++ob) {
     let observationVector = [1, ob + 1];
     regMatrix[ob] = observationVector;
   }
   return regMatrix;
-}; 
+};
 
-const roundingUpToNDecimalPlaces = function (number : number, n : number) : number { 
+const roundingUpToNDecimalPlaces = function (
+  number: number,
+  n: number
+): number {
   let fixDecimalPlaces = number.toFixed(n);
   return Number(fixDecimalPlaces);
-}
+};
 
-const transposeMatrix = function(matrix : Array<any[]>) : Array<any[]> {
+const transposeMatrix = function (matrix: Array<any[]>): Array<any[]> {
   let totalRows = matrix.length;
   let transposedVersion = [];
   for (let rowIndex = 0; rowIndex < totalRows; ++rowIndex) {
@@ -29,11 +36,11 @@ const transposeMatrix = function(matrix : Array<any[]>) : Array<any[]> {
   return transposedVersion;
 };
 
-const eliminateRowColFromAMatrix = function(
-  matrix : Array<any[]>,
-  row : number,
-  col : number
-) : Array<any[]> {
+const eliminateRowColFromAMatrix = function (
+  matrix: Array<any[]>,
+  row: number,
+  col: number
+): Array<any[]> {
   let minor = [];
   let totalRows = matrix.length;
   for (let rowIndex = 0; rowIndex < totalRows; ++rowIndex) {
@@ -55,7 +62,10 @@ const eliminateRowColFromAMatrix = function(
   return minor;
 };
 
-const calcProductMatrixWithAScalar = function(matrix : Array<number[]>, scalar : number) : Array<number[]> {
+const calcProductMatrixWithAScalar = function (
+  matrix: Array<number[]>,
+  scalar: number
+): Array<number[]> {
   let totalRows = matrix.length;
   let product = [];
   for (let rowIndex = 0; rowIndex < totalRows; ++rowIndex) {
@@ -63,31 +73,39 @@ const calcProductMatrixWithAScalar = function(matrix : Array<number[]>, scalar :
     product[rowIndex] = [];
     let totalCols = currentRow.length;
     for (let colIndex = 0; colIndex < totalCols; ++colIndex) {
-      let element = currentRow[colIndex];
-      product[rowIndex][colIndex] = element * scalar;
+      let element = new BigNumber(currentRow[colIndex]);
+      let scB = new BigNumber(scalar);
+      let p = element.multipliedBy(scB);
+      product[rowIndex][colIndex] = p.toNumber();
     }
   }
   return product;
 };
 
-const calcDotProduct = function(vectorOne : number[], vectorTwo : number[]) : number {
+const calcDotProduct = function (
+  vectorOne: number[],
+  vectorTwo: number[]
+): number {
   /*  1. also known as scalar product => returns a scalar = sum of products (i.e. where each product = one element from vectorOne * one from vectorTwo
         (i.e. not all possible combinations (only a subset), the elements need to have the same relative position).
         2. size matters => the vectors need to be non-empty arrays of equal length, else => return undefined ) 
         3. requirements for each vectors => a) each element must hold data, b) data must be a number, else => return undefined*/
   let lengthVectorOne = vectorOne.length;
 
-  let dotProduct = 0;
+  let dotProduct = new BigNumber(0);
 
   for (let index = 0; index < lengthVectorOne; ++index) {
-    let elementFromV1 = vectorOne[index];
-    let elementFromV2 = vectorTwo[index];
-    dotProduct += elementFromV1 * elementFromV2;
+    let elementFromV1 = new BigNumber(vectorOne[index]);
+    let elementFromV2 = new BigNumber(vectorTwo[index]);
+    dotProduct = dotProduct.plus(elementFromV1.multipliedBy(elementFromV2));
   }
-  return dotProduct;
+  return dotProduct.toNumber();
 };
 
-const calcMatrixProductWithAVector = function(matrix : Array<number[]>, vector : number[]) : number[] {
+const calcMatrixProductWithAVector = function (
+  matrix: Array<number[]>,
+  vector: number[]
+): number[] {
   let totalRows = matrix.length;
   let product = [];
   for (let index = 0; index < totalRows; ++index) {
@@ -97,7 +115,10 @@ const calcMatrixProductWithAVector = function(matrix : Array<number[]>, vector :
   return product;
 };
 
-const calcMatrixProduct = function(matrixOne : Array<number[]>, matrixTwo : Array<number[]>) : Array<number[]> {
+const calcMatrixProduct = function (
+  matrixOne: Array<number[]>,
+  matrixTwo: Array<number[]>
+): Array<number[]> {
   /* 1. multiplies two matrices in a particular order => returns a matrix where each element is the dot product of one vector from matrixOne and one vector from matrixTwo
      2. cols of matrixOne need to equal rows of matrixTwo, else => return undefined
      3. use calcDotProduct(rowVector from matrixOne, colVector from matrixTwo) */
@@ -128,10 +149,10 @@ const calcMatrixProduct = function(matrixOne : Array<number[]>, matrixTwo : Arra
   return matrixProduct;
 };
 
-const calcDeterminantOfMatrix = function(
-  matrix : Array<number[]>,
-  determinantValue : number = 0
-) : number {
+const calcDeterminantOfMatrix = function (
+  matrix: Array<number[]>,
+  determinantValue: number = 0
+): number {
   /* since x'x will always be 2x2, no need for anything faster than laplace(cofactor) expansion
   1. if matrix is non square (number of rows !== number of cols) => return undefined
   2. if matrix contains 1 row and 1 col, => determinant = the only element
@@ -140,21 +161,25 @@ const calcDeterminantOfMatrix = function(
   if (totalRows === 1) {
     return matrix[0][0];
   }
+  let detV = new BigNumber(determinantValue);
   for (let colIndex = 0; colIndex < totalRows; ++colIndex) {
     /// can use totalRows because it is a square matrix
-    let element = matrix[0][colIndex];
-    determinantValue +=
-      Math.pow(-1, 0 + colIndex) *
-      element *
-      calcDeterminantOfMatrix(
-        eliminateRowColFromAMatrix(matrix, 0, colIndex)
-      );
+    let element = new BigNumber(matrix[0][colIndex]);
+    detV = detV.plus(
+      element
+        .multipliedBy(
+          calcDeterminantOfMatrix(
+            eliminateRowColFromAMatrix(matrix, 0, colIndex)
+          )
+        )
+        .multipliedBy(Math.pow(-1, 0 + colIndex))
+    );
   }
 
-  return determinantValue;
+  return detV.toNumber();
 }; /* general function for a non-empty 2d (square) array of numbers */
 
-const getCofactorMatrix = function(matrix : Array<number[]>) : Array<number[]> {
+const getCofactorMatrix = function (matrix: Array<number[]>): Array<number[]> {
   let totalRows = matrix.length;
   let cofactorMatrix = [];
   for (let rowIndex = 0; rowIndex < totalRows; ++rowIndex) {
@@ -165,11 +190,7 @@ const getCofactorMatrix = function(matrix : Array<number[]>) : Array<number[]> {
       let cofactor =
         Math.pow(-1, rowIndex + colIndex) *
         calcDeterminantOfMatrix(
-          eliminateRowColFromAMatrix(
-            matrix,
-            rowIndex,
-            colIndex
-          )
+          eliminateRowColFromAMatrix(matrix, rowIndex, colIndex)
         );
       cofactorMatrix[rowIndex][colIndex] = cofactor;
     }
@@ -177,7 +198,10 @@ const getCofactorMatrix = function(matrix : Array<number[]>) : Array<number[]> {
   return cofactorMatrix;
 };
 
-const genInverseOfMatrix = function(matrix : Array<number[]>, determinantValue : number) : Array<number[]> {
+const genInverseOfMatrix = function (
+  matrix: Array<number[]>,
+  determinantValue: number
+): Array<number[]> {
   if (matrix.length === 1) {
     return calcProductMatrixWithAScalar([[1]], determinantValue);
   }
@@ -190,36 +214,46 @@ const genInverseOfMatrix = function(matrix : Array<number[]>, determinantValue :
   );
 };
 
-const calcInterceptAndSlope = function(regMatrix : Array<number[]> , depVarVector : number[]) : number[] {
+const calcInterceptAndSlope = function (
+  regMatrix: Array<number[]>,
+  depVarVector: number[]
+): number[] {
   /* this would need to calculate slope and intercept */
 
   let transposedRegMatrix = transposeMatrix(regMatrix);
-  let varCovarRegMatrix = calcMatrixProduct(
+  let varCovarRegMatrix = calcMatrixProduct(transposedRegMatrix, regMatrix);
+
+  let covarVectorRegsAndDepVar = calcMatrixProductWithAVector(
     transposedRegMatrix,
-    regMatrix
+    depVarVector
   );
-  
-  let covarVectorRegsAndDepVar = calcMatrixProductWithAVector(transposedRegMatrix, depVarVector);
-  let determinantOfVarCovarMatrix = calcDeterminantOfMatrix(
-    varCovarRegMatrix
+  let determinantOfVarCovarMatrix = calcDeterminantOfMatrix(varCovarRegMatrix);
+
+  let inverse = genInverseOfMatrix(
+    varCovarRegMatrix,
+    determinantOfVarCovarMatrix
+  );
+  let coefficients = calcMatrixProductWithAVector(
+    inverse,
+    covarVectorRegsAndDepVar
   );
 
-  let inverse = genInverseOfMatrix(varCovarRegMatrix, determinantOfVarCovarMatrix);
-  let coefficients = calcMatrixProductWithAVector(inverse, covarVectorRegsAndDepVar)
-  let roundedCoefficients = roundCoefficients(coefficients);
-  return roundedCoefficients;
+  return coefficients;
 };
 
-const roundCoefficients = function (matrixOfCoefficients : number[]) : number[] {
-  let totalNumberOfCoefficients = matrixOfCoefficients.length;
-  let matrixOfRoundedCoefficients = [];
+const roundCoefficients = function (arrofCoeff: number[]): number[] {
+  let totalNumberOfCoefficients = arrofCoeff.length;
+  let arrofRoundCoeff = [];
   for (let index = 0; index < totalNumberOfCoefficients; ++index) {
-    let coefficient = matrixOfCoefficients[index];
-    matrixOfRoundedCoefficients.push(roundingUpToNDecimalPlaces(coefficient, 2));
+    let coefficient = arrofCoeff[index];
+    arrofRoundCoeff.push(
+      roundingUpToNDecimalPlaces(coefficient, 2)
+    );
   }
-  return matrixOfRoundedCoefficients;
-}
+  return arrofRoundCoeff;
+};
 
-export {roundingUpToNDecimalPlaces};
-export {createMatrixOfRegressors};
-export {calcInterceptAndSlope};
+export {roundCoefficients};
+export { roundingUpToNDecimalPlaces };
+export { createMatrixOfRegressors };
+export { calcInterceptAndSlope };

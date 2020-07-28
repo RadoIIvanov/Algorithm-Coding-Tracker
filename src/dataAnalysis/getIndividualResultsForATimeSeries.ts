@@ -1,29 +1,34 @@
 import { createMatrixOfRegressors } from "./analyzeTimeSeries/linearAlgebraOperations";
 import { calcInterceptAndSlope } from "./analyzeTimeSeries/linearAlgebraOperations";
 import { whenToEvaluateBothLongTermVsRecentPerformance } from "./options";
-import { recentPerformance } from "./options";
+import { splitF } from "./options";
 import { create } from "domain";
 import {objofResultsForAnObjective} from "../dataStructureInterfaces";
 
-const returnTrueifImprove = function (
-  slopeOne: number,
-  slopeTwo: number,
-  directionOfSuccess: boolean
-): boolean 
-{
-  return (
-    ((slopeTwo !== undefined &&
-      slopeTwo / slopeOne > 1 &&
-      (Number(directionOfSuccess) +
-        Number(!!(slopeOne + Math.abs(slopeOne))) +
-        Number(!!(slopeTwo + Math.abs(slopeTwo)))) %
-      3 ===
-      0) ||
-    (slopeTwo === undefined &&
-      (Number(directionOfSuccess) + Number(!!(slopeOne + Math.abs(slopeOne)))) %
-      2 ===
-      0)) && slopeOne !== 0 
-  );
+const returnTrueifImprove = function (s1: number, s2: number, i1: number, i2: number, doS: boolean, tsLength: number) : boolean {
+  if (s2 === undefined) {
+    return oneLineEval(s1, doS);
+  } else {
+    return twoLineEval(s1, s2, i1, i2, doS, tsLength);
+  }
+};
+
+const oneLineEval = function (s1: number, doS: boolean) : boolean {
+  if ((s1 > 0 && doS === true) || (s1 < 0 && doS === false)) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+const twoLineEval = function (s1: number, s2: number, i1: number, i2: number, doS: boolean, tsLength: number) : boolean {
+  let midFL = i1 + (s1 * tsLength) / 2;
+  let midSL = i2 + (s2 * tsLength) / 2;
+  if ((midSL > midFL && doS === true) || (midSL < midFL && doS === false)) {
+    return true;
+  } else {
+    return false;
+  }
 };
 
 const getResultsForIndividualMeasures = function (
@@ -35,21 +40,23 @@ const getResultsForIndividualMeasures = function (
 
   let timeSeriesTotalPoints = timeSeries.length;
 
-  let matrixOfRegressorsForWholeLine = createMatrixOfRegressors(
-    timeSeriesTotalPoints
+  let pInFirstP = Math.ceil(timeSeriesTotalPoints * splitF)
+  let matrixOfRegressorsForFP = createMatrixOfRegressors(
+    pInFirstP
   );
   let calcInterceptsAndSlopes = calcInterceptAndSlope(
-    matrixOfRegressorsForWholeLine,
-    timeSeries
+    matrixOfRegressorsForFP,
+    timeSeries.slice(0, pInFirstP)
   );
 
   if (timeSeriesTotalPoints > whenToEvaluateBothLongTermVsRecentPerformance) 
   {
+    let pInLastPart = Math.floor(timeSeriesTotalPoints * (1 - splitF));
     let matrixOfRegressorsForRecentLine = createMatrixOfRegressors(
-      recentPerformance
+      pInLastPart
     );
     let recentTimeSeries = timeSeries.slice(
-      timeSeriesTotalPoints - recentPerformance
+      timeSeriesTotalPoints - pInLastPart
     );
 
     calcInterceptsAndSlopes = calcInterceptsAndSlopes.concat(
@@ -59,7 +66,10 @@ const getResultsForIndividualMeasures = function (
   let improveOrNot: boolean = returnTrueifImprove(
     calcInterceptsAndSlopes[1],
     calcInterceptsAndSlopes[3],
-    directionOfSuccess
+    calcInterceptsAndSlopes[0],
+    calcInterceptsAndSlopes[2],
+    directionOfSuccess,
+    Math.ceil(timeSeriesTotalPoints / 2)
   );
 
   individualResults = 

@@ -19,8 +19,18 @@ const drawGraph3V = function (userC, data) {
     persistence: "% of Incompleted Problems",
   };
 
+  const roundCoefficients = function (arrofCoeff, n) {
+    let totalNumberOfCoefficients = arrofCoeff.length;
+    let arrofRoundCoeff = [];
+    for (let index = 0; index < totalNumberOfCoefficients; ++index) {
+      let coefficient = arrofCoeff[index];
+      arrofRoundCoeff.push(Number(roundingUpToNDecimalPlaces(coefficient, n)));
+    }
+   return arrofRoundCoeff;
+  };
+
   const roundingUpToNDecimalPlaces = function (number, n) {
-    /// not quite the same fn as in ts linear algebra files
+   /// not quite the same fn as in ts linear algebra files
     let fixDecimalPlaces = number.toFixed(n);
     return fixDecimalPlaces;
   };
@@ -44,11 +54,12 @@ const drawGraph3V = function (userC, data) {
     seriesArr = seriesArr.map((element) =>
       Number(roundingUpToNDecimalPlaces(element / 60, 2))
     );
-    intAndSlopArr = intAndSlopArr.map((element) =>
-      Number(roundingUpToNDecimalPlaces(element / 60, 2))
+   intAndSlopArr = intAndSlopArr.map((element) =>
+      Number(roundingUpToNDecimalPlaces(element / 60, 7))
     );
-  } else {
+ } else {
     vIncrement = 0.05;
+    intAndSlopArr = roundCoefficients(intAndSlopArr, 7);
   }
 
   let minV = Math.min(...seriesArr, Number(benchV));
@@ -112,7 +123,7 @@ const drawGraph3V = function (userC, data) {
   let startX = marginLandR;
   let startY = marginTandB;
 
-  let title = nameMeasure[userC]; // this will be received from button press
+  let title = nameMeasure[userC];
   cs.font = `${canvas.height / 30}px Georgia`;
   let titleWidth = cs.measureText(title).width;
   if (titleWidth > canvas.width) {
@@ -178,6 +189,7 @@ const drawGraph3V = function (userC, data) {
   drawYValAndHLines(startX, startY, vStep, topV, widthOfGraph, benchV);
   cs.stroke();
 
+  let canPlot = true;
   const drawXValAndLines = function (
     startX,
     startY,
@@ -195,10 +207,16 @@ const drawGraph3V = function (userC, data) {
     let cStrW = cs.measureText(str).width;
     for (let i = 0.05, j = 1; cStrW > 0.5 * widthOfGraph; j++) {
       p = p - i * j;
+      if (p < i) {
+        canPlot = false;
+        break;
+      }
       cs.font = `${vStep * p}px Verdana`;
       cStrW = cs.measureText(str).width;
     }
-
+    if (canPlot === false) {
+      return;
+    }
     for (let i = 0; i <= nOfHSect; i++) {
       let hPosition = startX + i * hStep;
       let hValue = i;
@@ -226,7 +244,7 @@ const drawGraph3V = function (userC, data) {
   cs.translate(startX, startY + lengthOfGraph);
 
   const constPoint = function (x, y) {
-    cs.arc(x, y, ((canvas.height + canvas.width) / 2) * 0.005, 0, Math.PI * 2);
+    cs.arc(x, y, ((canvas.height + canvas.width) / 2) * 0.003, 0, Math.PI * 2);
     cs.closePath();
   };
 
@@ -239,63 +257,98 @@ const drawGraph3V = function (userC, data) {
       constPoint(x, -y);
     }
   };
-  plotTs(vStep, hStep, botV, vIncrement);
+  if (canPlot === true) {
+      plotTs(vStep, hStep, botV, vIncrement);
   cs.fill();
+  }
 
-  cs.beginPath();
 
   const plotRegL = function (
     interceptAndSlopeData,
+    tsLength,
     vStep,
     hStep,
     botV,
     vIncrement,
     nOfHSect,
-    size
+    name,
   ) {
     let pS = interceptAndSlopeData[0];
     let s = interceptAndSlopeData[1];
 
-    let pE = pS + nOfHSect * s;
+    let pE = pS + tsLength * s;
     let yS = -(((pS - botV) / vIncrement) * vStep);
 
     let yE = -(((pE - botV) / vIncrement) * vStep);
-    cs.moveTo(0, yS);
-    cs.lineTo(nOfHSect * hStep, yE);
+    if (name === 'whole' || name === 'first half') {
+      cs.moveTo(0, yS);
+      cs.lineTo(tsLength * hStep, yE);
+    } else {
+      cs.moveTo(tsLength * hStep, yS);
+      cs.lineTo(tsLength * hStep * 2, yE);
+    }
 
-    let com = `${size} regression line, slope ${s}`;
+    let com, yPos;
+    if (name === 'whole' || name === 'first half') {
+      yPos = canvas.height / 35;
+    } else {
+      yPos = (canvas.height / 35) * 2;
+    }
+
+    if (name === 'whole') {
+      com = `${name} regression line, slope ${s}`;
+    } else {
+      com = `${name} regression line, mid point(avg level) ${roundingUpToNDecimalPlaces(pS + (s * tsLength / 2), 7)}, slope ${s}`;
+    }
     cs.font = `${canvas.height / 35}px Verdana`;
     let comW = cs.measureText(com).width;
-    let yPos = size === "partial(last 3 points)"? canvas.height / 35 * 2 : canvas.height / 35;
     cs.strokeText(com, hStep * nOfHSect - comW, yPos);
-    // let pM = pS + (nOfHSect / 2) * s;
-    // let yM = -(((pM - botV) / vIncrement) * vStep);
-    // let ratio = (-yS - -yM) / ((nOfHSect / 2) * hStep);
-    // cs.translate(0, yS);
-    // cs.rotate(Math.atan(ratio));
-    // cs.fillText(com, 0, -2);
-    // cs.rotate(-Math.atan(ratio));
-    // cs.translate(0, -yS);
   };
-  cs.strokeStyle = "green";
-  plotRegL(intAndSlopArr, vStep, hStep, botV, vIncrement, nOfHSect, "whole");
-  cs.stroke();
-
+  cs.lineWidth = 3;
   if (intAndSlopArr.length > 2) {
     cs.beginPath();
-    cs.strokeStyle = "red";
+    cs.strokeStyle = "green";
     plotRegL(
-      intAndSlopArr.slice(2),
+      intAndSlopArr,
+      Math.ceil(seriesArr.length / 2),
       vStep,
       hStep,
       botV,
       vIncrement,
       nOfHSect,
-      "partial(last 3 points)"
+      "first half",
+    );
+    cs.stroke();
+
+    cs.beginPath();
+    cs.strokeStyle = "red";
+    plotRegL(
+      intAndSlopArr.slice(2),
+      Math.ceil(seriesArr.length / 2),
+      vStep,
+      hStep,
+      botV,
+      vIncrement,
+      nOfHSect,
+      `last half`,
+    );
+    cs.stroke();
+  } else {
+    cs.beginPath();
+    cs.strokeStyle = "green";
+    plotRegL(
+      intAndSlopArr,
+      Math.ceil(seriesArr.length / 2),
+      vStep,
+      hStep,
+      botV,
+      vIncrement,
+      nOfHSect,
+      "whole",
     );
     cs.stroke();
   }
-}; /// for the text of reg lines, a legend will be used (i.e. bot right). Cannot cover all the edges cases when text is rotated along the reg lines (i.e. low intercept and big negative slope...)
+};
 
 const crudDom2V = function (data, arrOfM) {
   let body = document.documentElement.children[1];
@@ -352,20 +405,24 @@ const crudDom2V = function (data, arrOfM) {
   let notesEv = document.createElement("p");
   notesEv.setAttribute("id", "notesEv2v");
   notesEv.innerHTML =
-    "<strong>** (Tick vs Cross) - 1. Slope of the whole reg line needs to be in the right direction AND 2. Recent(last 3 points) slope / whole slope > 1</strong>";
+    "<strong>** (Tick vs Cross) - 1. if 1 Reg Line(less than 7p) => slope needs to be in the right direction, 2. if 2 => compare their mid points </strong>";
   let notesCal = document.createElement("p");
   notesCal.setAttribute("id", "notesCalc2v");
   notesCal.innerHTML =
     "<strong>** Calculations are 1. imprecise (i.e. operations with decimals) and 2. rounded. Don't put much value in small slopes/differences</strong>";
+  let notesPoints = document.createElement("p");
+  notesPoints.setAttribute('id', "notesPoints2v");
+  notesPoints.innerHTML = "<strong>** If points are too many to draw (i.e. given a certain width), only reg lines will be drawn </strong>";
   cont.appendChild(notesEv);
   cont.appendChild(notesCal);
+  cont.appendChild(notesPoints);
 };
 
 const crudDom3V = function (userC, data) {
   let body = document.documentElement.children[1];
   removeBotUp(orderTopDown(body, []));
   let div = document.createElement("div");
-  div.setAttribute('id', 'div3v');
+  div.setAttribute("id", "div3v");
   let butt = document.createElement("button");
   butt.innerHTML = `&#8592; Return Back`;
   div.appendChild(butt);
@@ -487,9 +544,8 @@ window.addEventListener(
     inpBox.addEventListener(
       "change",
       (event) => {
-        console.log(inpBox.value);
         if (inpBox.value.match(/^[1-9]\d?$/) === null || inpBox.value === "1") {
-          inpBox.setCustomValidity("Please, provide a number (2-99)"); 
+          inpBox.setCustomValidity("Please, provide a number (2-99)");
           event.stopPropagation();
           return;
         }

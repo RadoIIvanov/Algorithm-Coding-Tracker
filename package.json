@@ -50,5 +50,8 @@
     "vscode": "^1.1.28",
     "tslint": "^5.12.1",
     "@types/node": "^10.12.21"
+  },
+  "dependencies": {
+    "bignumber.js": "^9.0.0"
   }
 }

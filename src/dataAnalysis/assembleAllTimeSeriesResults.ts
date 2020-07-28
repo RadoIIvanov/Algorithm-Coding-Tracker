@@ -57,7 +57,6 @@ const returnAllTimeSeriesResults = function (
   } else {
     returnArrOfResults[returnArrOfResults.length] = getResultsForIndividualMeasures(false, timeSeriesForIncompletes, actualizedBenchmarksForChosenDifficulty[actualizedBenchmarksForChosenDifficulty.length - 1]);
   }
-
   return returnArrOfResults;
 };
 
