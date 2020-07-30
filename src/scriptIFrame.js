@@ -388,7 +388,9 @@ const crudDom2V = function (data, arrOfM) {
     spanS.innerText = `${arrOfM[i]}`;
     let spanI = document.createElement("span");
     spanI.setAttribute("class", `impV`);
-    if (data[i].improveOrNot === true) {
+    if (data[i] === "Not enough data") {
+      spanI.innerHTML = `ND`;
+    } else if (data[i].improveOrNot === true) {
       spanI.innerHTML = `&#10004;`;
     } else {
       spanI.innerHTML = `&#10060;`;
@@ -405,7 +407,7 @@ const crudDom2V = function (data, arrOfM) {
   let notesEv = document.createElement("p");
   notesEv.setAttribute("id", "notesEv2v");
   notesEv.innerHTML =
-    "<strong>** (Tick vs Cross) - 1. if 1 Reg Line(less than 7p) => slope needs to be in the right direction, 2. if 2 => compare their mid points </strong>";
+    "<strong>** ND=not enough data, (Tick vs Cross) - if 1 RL(less than 7p) => slope needs to be in the right direction, if 2 RL => 2nd midP must be better</strong>";
   let notesCal = document.createElement("p");
   notesCal.setAttribute("id", "notesCalc2v");
   notesCal.innerHTML =
@@ -597,6 +599,10 @@ const handlerHof = function (event) {
   let allButt = document.getElementsByTagName("button");
   for (let i = 0; i < allButt.length; ++i) {
     let butt = allButt[i];
+    console.log('here');
+    if (data[i] === 'Not enough data' || i >= data.length) {
+      continue;
+    }
     butt.addEventListener("click", (event) => {
       event.stopPropagation();
       crudDom3V(

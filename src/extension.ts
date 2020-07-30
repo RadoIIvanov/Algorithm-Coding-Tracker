@@ -11,6 +11,7 @@ import { returnAllTimeSeriesResults } from "./dataAnalysis/assembleAllTimeSeries
 import * as path from "path";
 import * as os from "os";
 import * as fs from 'fs';
+import { time } from "console";
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 
@@ -76,6 +77,10 @@ export function activate(context: vscode.ExtensionContext) {
   let timerStop = vscode.commands.registerCommand(
     "extension.algocodingtracker.stopTimer",
     () => {
+      if (timer.state === undefined) {
+        return; /// case for results activation => stop
+      }
+
       if (timer.state !== TimerState.Aborted) {
         timer.saveIfSessionAbortedORStopped(context);
       } else {
