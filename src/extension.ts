@@ -11,7 +11,6 @@ import { returnAllTimeSeriesResults } from "./dataAnalysis/assembleAllTimeSeries
 import * as path from "path";
 import * as os from "os";
 import * as fs from 'fs';
-import { time } from "console";
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 
@@ -46,8 +45,9 @@ export function activate(context: vscode.ExtensionContext) {
           })
           .then(choice => {
             if (choice === "Yes") {
-              timer.saveIfSessionAbortedORStopped(context);
+              timer.saveIfSessionAbortedORStopped(context); 
               data = getDataToCheckDeactivationStateAndIncompletes(fullPath);
+              data.isTimerDeactivated = false;
               timer = reInitializeTimer(timer, context, data);
             }
           });
@@ -78,6 +78,7 @@ export function activate(context: vscode.ExtensionContext) {
     "extension.algocodingtracker.stopTimer",
     () => {
       if (timer.state === undefined) {
+        vscode.window.showInformationMessage("Timer is not on");
         return; /// case for results activation => stop
       }
 
@@ -160,10 +161,8 @@ export function activate(context: vscode.ExtensionContext) {
     }
     resultsP.webview.html = genHTMLforView1();
 
-    let js2VVsCId = vscode.Uri.file(path.join(context.extensionPath, 'src', 'secView.js'));
-    let js2VWebVId = resultsP.webview.asWebviewUri(js2VVsCId);
     resultsP.webview.onDidReceiveMessage((userC) => {
-      let data = new Promise((resolve, reject) => {
+      let response = new Promise((resolve, reject) => {
         fs.readFile(fullPath, (err, buff) => {
           if (err) {
             reject(err);
